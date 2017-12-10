@@ -6,13 +6,18 @@ using std::max;
 using std::swap;
 using std::reverse;
 
+#include <functional>
+using std::hash;
+
 #include <unordered_map>
 using std::unordered_map;
-
 
 #include <set>
 using std::set;
 using std::multiset;
+
+#include <memory>
+using std::unique_ptr;
 
 #include <vector>
 using std::vector;
@@ -21,7 +26,6 @@ using std::vector;
 #include "base/commandlineflags.h"
 #include "s2polygon.h"
 
-#include "base/port.h"  // for HASH_NAMESPACE_DECLARATION_START
 #include "util/coding/coder.h"
 #include "s2edgeindex.h"
 #include "s2cap.h"
@@ -107,14 +111,12 @@ S2Polygon::~S2Polygon() {
 typedef pair<S2Point, S2Point> S2PointPair;
 
 namespace std {
-
-template<> struct hash<S2PointPair> {
-  size_t operator()(S2PointPair const& p) const {
-    hash<S2Point> h;
-    return h(p.first) + (h(p.second) << 1);
-  }
-};
-
+  template<> struct hash<S2PointPair> {
+    size_t operator()(S2PointPair const& p) const {
+      hash<S2Point> h;
+      return h(p.first) + (h(p.second) << 1);
+    }
+  };
 }  // namespace std
 
 
@@ -225,7 +227,9 @@ bool S2Polygon::ContainsChild(S2Loop* a, S2Loop* b, LoopMap const& loop_map) {
 }
 
 void S2Polygon::Init(vector<S2Loop*>* loops) {
-  if (FLAGS_s2debug) CHECK(IsValid(*loops));
+  if (FLAGS_s2debug) {
+    CHECK(IsValid(*loops));
+  }
   DCHECK(loops_.empty());
   loops_.swap(*loops);
 
@@ -446,7 +450,9 @@ bool S2Polygon::Contains(S2Cell const& cell) const {
   S2Loop cell_loop(cell);
   S2Polygon cell_poly(&cell_loop);
   bool contains = Contains(&cell_poly);
-  if (contains) DCHECK(Contains(cell.GetCenter()));
+  if (contains) {
+    DCHECK(Contains(cell.GetCenter()));
+  }
   return contains;
 }
 
@@ -466,7 +472,9 @@ bool S2Polygon::MayIntersect(S2Cell const& cell) const {
   S2Loop cell_loop(cell);
   S2Polygon cell_poly(&cell_loop);
   bool intersects = Intersects(&cell_poly);
-  if (!intersects) DCHECK(!Contains(cell.GetCenter()));
+  if (!intersects) {
+    DCHECK(!Contains(cell.GetCenter()));
+  }
   return intersects;
 }
 
