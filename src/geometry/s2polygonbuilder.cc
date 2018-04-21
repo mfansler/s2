@@ -29,6 +29,7 @@ using std::vector;
 
 #include "base/logging.h"
 #include "base/macros.h"
+#include "base/scoped_ptr.h"
 #include "s2.h"
 #include "s2cellid.h"
 #include "s2polygon.h"
@@ -222,7 +223,7 @@ S2Loop* S2PolygonBuilder::AssembleLoop(S2Point const& v0, S2Point const& v1,
       }
 
       if (options_.undirected_edges() && !loop->IsNormalized()) {
-        unique_ptr<S2Loop> deleter(loop);  // XXX for debugging
+        scoped_ptr<S2Loop> deleter(loop);  // XXX for debugging
         return AssembleLoop(path[1], path[0], unused_edges);
       }
       return loop;

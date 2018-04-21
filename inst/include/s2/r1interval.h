@@ -3,6 +3,8 @@
 #ifndef UTIL_GEOMETRY_R1INTERVAL_H_
 #define UTIL_GEOMETRY_R1INTERVAL_H_
 
+#include <math.h>
+
 #include <algorithm>
 using std::min;
 using std::max;

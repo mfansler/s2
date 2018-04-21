@@ -7,7 +7,7 @@
 using std::ostream;
 using std::endl;
 
-#include <cmath>
+#include <math.h>
 #include "base/basictypes.h"
 #include "base/logging.h"
 #include "util/math/vector2-inl.h"

@@ -18,6 +18,7 @@ using std::unordered_map;
 #include "base/basictypes.h"
 #include "base/logging.h"
 #include "base/macros.h"
+#include "base/port.h"  // for HASH_NAMESPACE_DECLARATION_START
 #include "util/math/vector3-inl.h"
 #include "util/math/matrix3x3.h"
 
@@ -28,7 +29,6 @@ using std::unordered_map;
 // arithmetic expressions (e.g. (1-x)*p1 + x*p2).
 typedef Vector3_d S2Point;
 
-#include <unordered_set>
 
 namespace std {
 

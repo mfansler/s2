@@ -1,23 +1,28 @@
 // Copyright 2009 Google Inc. All Rights Reserved.
 
+#include "base/logging.h"
+#include "base/integral_types.h"
 #include "util/math/exactfloat/exactfloat.h"
 #include <cstring>
+
+#include <openssl/crypto.h>
 #include <cmath>
-
 #include <algorithm>
+#include <limits>
 
-using std::min;
+using std::ceil;
+using std::copysign;
+using std::fabs;
+using std::frexp;
+// using std::isinf;
+// using std::isnan;
+using std::ldexp;
 using std::max;
-using std::swap;
+using std::min;
+using std::numeric_limits;
 using std::reverse;
 using std::signbit;
-
-#include <limits>
-using std::numeric_limits;
-
-#include "base/integral_types.h"
-#include "base/logging.h"
-#include "openssl/crypto.h"
+using std::swap;
 
 // Define storage for constants.
 const int ExactFloat::kMinExp;
@@ -32,10 +37,10 @@ const int ExactFloat::kDoubleMantissaBits;
 // precision range so that (2 * bn_exp_) does not overflow an "int".  We take
 // advantage of this, for example, by only checking for overflow/underflow
 // *after* multiplying two numbers.
-static_assert(
+COMPILE_ASSERT(
     ExactFloat::kMaxExp <= INT_MAX / 2 &&
     ExactFloat::kMinExp - ExactFloat::kMaxPrec >= INT_MIN / 2,
-    "exactfloat_exponent_might_overflow");
+    exactfloat_exponent_might_overflow);
 
 // We define a few simple extensions to the BIGNUM interface.  In some cases
 // these depend on BIGNUM internal fields, so they might require tweaking if
@@ -56,7 +61,7 @@ void BN_ext_set_uint64(BIGNUM* bn, uint64 v) {
 #if BN_BITS2 == 64
   CHECK(BN_set_word(bn, v));
 #else
-  static_assert(BN_BITS2 == 32, "at_least_32_bit_openssl_build_needed");
+  COMPILE_ASSERT(BN_BITS2 == 32, at_least_32_bit_openssl_build_needed);
   CHECK(BN_set_word(bn, static_cast<uint32>(v >> 32)));
   CHECK(BN_lshift(bn, bn, 32));
   CHECK(BN_add_word(bn, static_cast<uint32>(v)));
@@ -299,22 +304,22 @@ int ExactFloat::NumSignificantDigitsForPrec(int prec) {
 // (e.g. 1/512 == 0.001953125 formatted as 0.002).
 static const int kMinSignificantDigits = 10;
 
-string ExactFloat::ToString() const {
+std::string ExactFloat::ToString() const {
   int max_digits = max(kMinSignificantDigits,
                        NumSignificantDigitsForPrec(prec()));
   return ToStringWithMaxDigits(max_digits);
 }
 
-string ExactFloat::ToStringWithMaxDigits(int max_digits) const {
+std::string ExactFloat::ToStringWithMaxDigits(int max_digits) const {
   DCHECK_GT(max_digits, 0);
   if (!is_normal()) {
     if (is_nan()) return "nan";
     if (is_zero()) return (sign_ < 0) ? "-0" : "0";
     return (sign_ < 0) ? "-inf" : "inf";
   }
-  string digits;
+  std::string digits;
   int exp10 = GetDecimalDigits(max_digits, &digits);
-  string str;
+  std::string str;
   if (sign_ < 0) str.push_back('-');
 
   // We use the standard '%g' formatting rules.  If the exponent is less than
@@ -360,8 +365,8 @@ string ExactFloat::ToStringWithMaxDigits(int max_digits) const {
 }
 
 // Increment an unsigned integer represented as a string of ASCII digits.
-static void IncrementDecimalDigits(string* digits) {
-  string::iterator pos = digits->end();
+static void IncrementDecimalDigits(std::string* digits) {
+  std::string::iterator pos = digits->end();
   while (--pos >= digits->begin()) {
     if (*pos < '9') { ++*pos; return; }
     *pos = '0';
@@ -369,7 +374,7 @@ static void IncrementDecimalDigits(string* digits) {
   digits->insert(0, "1");
 }
 
-int ExactFloat::GetDecimalDigits(int max_digits, string* digits) const {
+int ExactFloat::GetDecimalDigits(int max_digits, std::string* digits) const {
   DCHECK(is_normal());
   // Convert the value to the form (bn * (10 ** bn_exp10)) where "bn" is a
   // positive integer (BIGNUM).
@@ -420,7 +425,7 @@ int ExactFloat::GetDecimalDigits(int max_digits, string* digits) const {
 
   // Now strip any trailing zeros.
   DCHECK_NE((*digits)[0], '0');
-  string::iterator pos = digits->end();
+  std::string::iterator pos = digits->end();
   while (pos[-1] == '0') --pos;
   if (pos < digits->end()) {
     bn_exp10 += digits->end() - pos;
@@ -433,7 +438,7 @@ int ExactFloat::GetDecimalDigits(int max_digits, string* digits) const {
   return bn_exp10 + digits->size();
 }
 
-string ExactFloat::ToUniqueString() const {
+std::string ExactFloat::ToUniqueString() const {
   char prec_buf[20];
   sprintf(prec_buf, "<%d>", prec());
   return ToString() + prec_buf;
@@ -671,10 +676,10 @@ ExactFloat rint(const ExactFloat& a) {
 
 template <class T>
 T ExactFloat::ToInteger(RoundingMode mode) const {
-  static_assert(sizeof(T) <= sizeof(uint64), "max_64_bits_supported");
-  static_assert(numeric_limits<T>::is_signed, "only_signed_types_supported");
-  const int64 kMinValue = numeric_limits<T>::min();
-  const int64 kMaxValue = numeric_limits<T>::max();
+  COMPILE_ASSERT(sizeof(T) <= sizeof(uint64), max_64_bits_supported);
+  COMPILE_ASSERT(numeric_limits<T>::is_signed, only_signed_types_supported);
+  const std::int64_t kMinValue = numeric_limits<T>::min();
+  const std::int64_t kMaxValue = numeric_limits<T>::max();
 
   ExactFloat r = RoundToPowerOf2(0, mode);
   if (r.is_nan()) return kMaxValue;
@@ -682,7 +687,7 @@ T ExactFloat::ToInteger(RoundingMode mode) const {
   if (!r.is_inf()) {
     // If the unsigned value has more than 63 bits it is always clamped.
     if (r.exp() < 64) {
-      int64 value = BN_ext_get_uint64(r.bn_.get()) << r.bn_exp_;
+      std::int64_t value = BN_ext_get_uint64(r.bn_.get()) << r.bn_exp_;
       if (r.sign_ < 0) value = -value;
       return max(kMinValue, min(kMaxValue, value));
     }
@@ -753,7 +758,16 @@ ExactFloat logb(const ExactFloat& a) {
   return ExactFloat(a.exp() - 1);
 }
 
+// #ifdef __GNUC__
+// #pragma GCC diagnostic push
+// #pragma GCC diagnostic ignored "-Wunknown-pragmas"
+// // Some versions of CLANG suggest noreturn...
+// #pragma GCC diagnostic ignored "-Wsuggest-attribute=noreturn"
+// #endif
 ExactFloat ExactFloat::Unimplemented() {
   LOG(FATAL) << "Unimplemented ExactFloat method called";
   return NaN();
 }
+// #ifdef __GNUC__
+// #pragma GCC diagnostic pop
+// #endif

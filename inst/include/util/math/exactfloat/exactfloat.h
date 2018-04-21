@@ -94,18 +94,15 @@
 #ifndef UTIL_MATH_EXACTFLOAT_EXACTFLOAT_H_
 #define UTIL_MATH_EXACTFLOAT_EXACTFLOAT_H_
 
+#include <math.h>
+#include <limits.h>
+
 #include <iostream>
-using std::ostream;
-using std::endl;
-
-#include <string>
-using std::string;
-
-#include "base/logging.h"
-#include "base/integral_types.h"
-#include "openssl/bn.h"
-
 #include <memory>
+#include <string>
+
+#include <openssl/bn.h>
+
 struct BIGNUM_deleter {
   void operator()(BIGNUM *b) { BN_free(b); }
 };
@@ -286,17 +283,17 @@ class ExactFloat {
   // Note that if two values have different precisions, they may have the same
   // ToString() value even though their values are slightly different.  If you
   // need to distinguish such values, use ToUniqueString() intead.
-  string ToString() const;
+  std::string ToString() const;
 
   // Return a string formatted according to printf("%Ng") where N is the given
   // maximum number of significant digits.
-  string ToStringWithMaxDigits(int max_digits) const;
+  std::string ToStringWithMaxDigits(int max_digits) const;
 
   // Return a human-readable string such that if two ExactFloats have different
   // values, then their string representations are always different.  This
   // method is useful for debugging.  The string has the form "value<prec>",
   // where "prec" is the actual precision of the ExactFloat (e.g., "0.215<50>").
-  string ToUniqueString() const;
+  std::string ToUniqueString() const;
 
   // Return an upper bound on the number of significant digits required to
   // distinguish any two floating-point numbers with the given precision when
@@ -304,7 +301,7 @@ class ExactFloat {
   static int NumSignificantDigitsForPrec(int prec);
 
   // Output the ExactFloat in human-readable format, e.g. for logging.
-  friend ostream& operator<<(ostream& o, ExactFloat const& f) {
+  friend std::ostream& operator<<(std::ostream& o, ExactFloat const& f) {
     return o << f.ToString();
   }
 
@@ -437,6 +434,11 @@ class ExactFloat {
     return Unimplemented();
   }
 
+  // A synonym for remainder().
+  friend ExactFloat drem(const ExactFloat& a, const ExactFloat& b) {
+    return remainder(a, b);
+  }
+
   // Break the argument "a" into integer and fractional parts, each of which
   // has the same sign as "a".  The fractional part is returned, and the
   // integer part is stored in the output parameter "i_ptr".  Both output
@@ -514,7 +516,7 @@ class ExactFloat {
   // Convert the ExactFloat to a decimal value of the form 0.ddd * (10 ** x),
   // with at most "max_digits" significant digits (trailing zeros are removed).
   // Set (*digits) to the ASCII digits and return the decimal exponent "x".
-  int GetDecimalDigits(int max_digits, string* digits) const;
+  int GetDecimalDigits(int max_digits, std::string* digits) const;
 
   // Return a_sign * fabs(a) + b_sign * fabs(b).  Used to implement addition
   // and subtraction.

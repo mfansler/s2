@@ -15,6 +15,13 @@
 #include <functional>
 using std::less;
 
+#include <unordered_map>
+using std::unordered_map;
+
+#include <unordered_set>
+using std::unordered_set;
+
+
 #include <set>
 using std::set;
 using std::multiset;
@@ -40,6 +47,9 @@ using std::vector;
 #endif
 #include <ctype.h>      // not needed, but removing it will break the build
 
+using namespace std;
+using namespace std;
+
 // A buffer size which is large enough for all the FastToBuffer functions, as
 // well as DoubleToBuffer and FloatToBuffer.  We define this here in case other
 // string headers depend on it.
@@ -49,8 +59,14 @@ static const int kFastToBufferSize =       32;
 #include "base/logging.h"  // for CHECK
 #include "base/strtoint.h"
 #include "base/int128.h"
+#include "ascii_ctype.h"
+//#include "charset.h"
+//#include "escaping.h"
+//#include "host_port.h"
 #include "stringprintf.h"
+#include "base/stl_decl.h"
 #include "base/port.h"
+//#include "endian.h"
 
 // ----------------------------------------------------------------------
 // FloatToString()

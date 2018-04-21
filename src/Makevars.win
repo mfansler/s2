@@ -7,11 +7,13 @@ OBJECTS_S2UTIL= \
   geometry/base/logging.o \
   geometry/base/stringprintf.o \
   geometry/base/strtoint.o \
+  geometry/strings/ascii_ctype.o \
   geometry/strings/split.o \
   geometry/strings/stringprintf.o \
   geometry/strings/strutil.o \
   geometry/util/coding/coder.o \
   geometry/util/coding/varint.o \
+  geometry/util/hash/hash.o \
   geometry/util/math/exactfloat/exactfloat.o \
   geometry/util/math/mathlimits.o \
   geometry/util/math/mathutil.o

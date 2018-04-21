@@ -7,9 +7,6 @@
 using std::ostream;
 using std::endl;
 
-#include <functional>
-using std::hash;
-
 #include <string>
 using std::string;
 
@@ -18,6 +15,7 @@ using std::vector;
 
 #include "base/basictypes.h"
 #include "base/logging.h"
+#include "base/port.h"  // for HASH_NAMESPACE_DECLARATION_START
 #include "s2.h"
 #include "util/math/vector2.h"
 
@@ -491,11 +489,15 @@ ostream& operator<<(ostream& os, S2CellId const& id);
 #ifndef SWIG
 
 namespace std {
-  template<> struct hash<S2CellId> {
-    size_t operator()(S2CellId const& id) const {
-      return static_cast<size_t>(id.id() >> 32) + static_cast<size_t>(id.id());
-    }
-  };
+
+
+template<> struct hash<S2CellId> {
+  size_t operator()(S2CellId const& id) const {
+    return static_cast<size_t>(id.id() >> 32) + static_cast<size_t>(id.id());
+  }
+};
+
+
 }  // namespace std
 
 #endif  // SWIG

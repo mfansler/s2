@@ -16,14 +16,17 @@ using std::vector;
 #include <unordered_map>
 using std::unordered_map;
 
+
 #include <utility>
 using std::pair;
 using std::make_pair;
+
 
 #include "s2loop.h"
 
 #include "base/commandlineflags.h"
 #include "base/logging.h"
+#include "base/scoped_ptr.h"
 #include "util/coding/coder.h"
 #include "s2cap.h"
 #include "s2cell.h"

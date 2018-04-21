@@ -13,6 +13,7 @@
 #ifndef UTIL_MATH_MATHLIMITS_H__
 #define UTIL_MATH_MATHLIMITS_H__
 
+#include <string.h>
 #include <cmath>
 #include <cfloat>
 #include "base/basictypes.h"
