@@ -1,5 +1,5 @@
 3b83ef96387f14655fc854ddc3c6bd57 *COPYING
-d3c129346a33ed71e3f2f4e64dd59fda *DESCRIPTION
+3fba626c2faa8d38f06fb49ec36066d2 *DESCRIPTION
 f32e76b7f1577f84fa95e92914d4dd41 *NAMESPACE
 9a102ec58c19f2c017ea91b708b33f4d *R/RcppExports.R
 c00b40ee2b27745351fff202f83f6b43 *R/s2.R
@@ -9,7 +9,7 @@ c00b40ee2b27745351fff202f83f6b43 *R/s2.R
 a6b494fb66d5a3d08319ee0ef9ab3e34 *cleanup
 d0ebc1667d5fe6bb4396c34e13d8b425 *configure
 d41d8cd98f00b204e9800998ecf8427e *configure.win
-2edad3e8e1b204d85c9bd57695160933 *inst/include/Rcpp_datatypes.h
+0dfe18786cb892f21f57c4b36d6afc7c *inst/include/Rcpp_datatypes.h
 c8eb3a390c9748d65674e60b3cfb3661 *inst/include/base/basictypes.h
 915fe6e59f040b8d582d3694bdff03aa *inst/include/base/casts.h
 595c65c61778e7fc1fbf66c30af3f64b *inst/include/base/commandlineflags.h
@@ -80,7 +80,7 @@ ca8de5787f7b90ecd91c0f13a6d5eaad *man/S2Covering.Rd
 1ac87bb8d3bf3a81eb863f02b27ab0d5 *man/S2LatLngRect.Rd
 3a5eea1b4776b233f6a65b12faab94df *man/S2LatLngRect_area.Rd
 e84151d78c5cf0da84328a7eb72fa748 *man/S2Point_interpolate.Rd
-c34a817cf7eabf53c4670314c535a612 *man/S2Polygon.Rd
+de5791da00fb79a1b2538d68d91d71bd *man/S2Polygon.Rd
 4b7c222e2c9a616814f655aba9513629 *man/S2Polygon_Contains.Rd
 93c3cad88dacaa004d775587bc935566 *man/S2Polygon_union.Rd
 ffd3e205884c7be0ab2a574959f66d6e *man/S2Polygons_area.Rd
@@ -88,7 +88,7 @@ f86e168a485abf2a6bc81d0d324923f1 *man/S2Polygons_centroid.Rd
 2cd2898685f349ae63cb918409345107 *man/S2Polygons_intersect.Rd
 56e7c01beea046b974b01674b72944e5 *man/S2Polygons_intersection.Rd
 0c4206ca0d410e5f6689d0632004d4e7 *man/S2Polyline_dist.Rd
-9c761f39ddebf48d1defb1bad0a756f9 *man/s2-package.Rd
+8691254db861b7808e527ba723cf5bf6 *man/s2-package.Rd
 5fa449d707bcf66467a73dfea00ab336 *src/Makevars.in
 4651058b17c56b75b71ab27236140ea2 *src/Makevars.win
 4f98a1d3e5c47935f03fcf7fb37ada25 *src/RcppExports.cpp
@@ -101,7 +101,7 @@ ed4c8f754be8f48440381ad6d8c9c834 *src/Rcpp_s2point.cpp
 820714cf248322712c2ce55fc9493786 *src/Rcpp_s2polygon.cpp
 16ffab918dbb64101259f1db546d1dd9 *src/geometry/CMakeLists.txt
 02b4443ec95add6a2ab82d519292c8b2 *src/geometry/base/int128.cc
-52efdb667bbc970c20d041ba27688356 *src/geometry/base/logging.cc
+265e30e51522a4245aa7495b2ad283f9 *src/geometry/base/logging.cc
 8c9a85b483c0c41e10fce727cd034ead *src/geometry/base/stringprintf.cc
 343610fb707bdb670232a15d5a04d7c7 *src/geometry/base/strtoint.cc
 1f9a79a93474bf53f130f2ea47fd4ab1 *src/geometry/s1angle.cc
@@ -117,14 +117,14 @@ e3c455a12344588d8db66fce74a3afc1 *src/geometry/s2edgeindex.cc
 f9c0c3e13404b1ea62e083d986dd6f4b *src/geometry/s2edgeutil.cc
 6d17485e047ba6115de19422ca2c07c1 *src/geometry/s2latlng.cc
 f824c04c63ccfd88b5dd3108546bfbda *src/geometry/s2latlngrect.cc
-81070c44d5f8a9e8581058e850ac4f38 *src/geometry/s2loop.cc
+fe4aac50b65d0aae677b2093d9291d5f *src/geometry/s2loop.cc
 7d40f13a36ed64d6c94e6bf87145cc31 *src/geometry/s2pointregion.cc
 d75e91c4c39b0c418794360730c696c9 *src/geometry/s2polygon.cc
 8e648dbfa6064d4be6da1cf1f74e9e43 *src/geometry/s2polygonbuilder.cc
-cf9c6bcdf95165e7e10596f209ee2932 *src/geometry/s2polyline.cc
+f5f6a60e00470bc706c09b375d5f3c5f *src/geometry/s2polyline.cc
 06aa50f707ea9e9a7b567d2f0644ce37 *src/geometry/s2r2rect.cc
 fd0e193b74029b78e293f1b24080e208 *src/geometry/s2region.cc
-935f4534851f4c8bddbd9279948048f7 *src/geometry/s2regioncoverer.cc
+104a3b5a0c0fa334b0d2ad43f1cc8472 *src/geometry/s2regioncoverer.cc
 a7131e588ef875472b89732bb415180e *src/geometry/s2regionintersection.cc
 c62c205875bdc4e7ccc972132902ccad *src/geometry/s2regionunion.cc
 631c5bf112b269afecabad1714de2026 *src/geometry/strings/ascii_ctype.cc
