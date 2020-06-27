@@ -1,16 +1,30 @@
 // Copyright 2005 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS-IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 
-#ifndef UTIL_GEOMETRY_S1INTERVAL_H_
-#define UTIL_GEOMETRY_S1INTERVAL_H_
+// Author: ericv@google.com (Eric Veach)
 
+#ifndef S2_S1INTERVAL_H_
+#define S2_S1INTERVAL_H_
+
+#include <cmath>
+#include <iosfwd>
 #include <iostream>
-using std::ostream;
-using std::endl;
 
-#include <math.h>
-#include "base/basictypes.h"
-#include "base/logging.h"
-#include "util/math/vector2-inl.h"
+#include "s2/base/logging.h"
+#include "s2/_fp_contract_off.h"
+#include "s2/util/math/vector.h"  // IWYU pragma: export
 
 // An S1Interval represents a closed interval on a unit circle (also known
 // as a 1-dimensional sphere).  It is capable of representing the empty
@@ -36,7 +50,7 @@ class S1Interval {
   // Constructor.  Both endpoints must be in the range -Pi to Pi inclusive.
   // The value -Pi is converted internally to Pi except for the Full()
   // and Empty() intervals.
-  inline S1Interval(double lo, double hi);
+  S1Interval(double lo, double hi);
 
   // The default constructor creates an empty interval.
   //
@@ -45,13 +59,13 @@ class S1Interval {
   // constructor above:
   //
   //   lng_bounds_ = S1Interval(lng_lo, lng_hi);
-  inline S1Interval();
+  S1Interval();
 
   // Returns the empty interval.
-  static inline S1Interval Empty();
+  static S1Interval Empty();
 
   // Returns the full interval.
-  static inline S1Interval Full();
+  static S1Interval Full();
 
   // Convenience method to construct an interval containing a single point.
   static S1Interval FromPoint(double p);
@@ -61,32 +75,28 @@ class S1Interval {
   // interval and calling AddPoint() twice, but it is more efficient.
   static S1Interval FromPointPair(double p1, double p2);
 
+  // Accessors methods.
   double lo() const { return bounds_[0]; }
   double hi() const { return bounds_[1]; }
-  double bound(int i) const { return bounds_[i]; }
-  Vector2_d const& bounds() const { return bounds_; }
 
-  // Methods to modify one endpoint of an existing S1Interval.  Requires that
-  // the resulting S1Interval is valid.  This implies you cannot call this
-  // method on an Empty() or Full() interval, since these intervals do not
-  // have any endpoints.
+  // Methods that allow the S1Interval to be accessed as a vector.  (The
+  // recommended style is to use lo() and hi() whenever possible, but these
+  // methods are useful when the endpoint to be selected is not constant.)
   //
-  // Do not use these methods if you want to replace both endpoints of the
-  // interval; use a constructor instead.  For example:
-  //
-  //   *lng_bounds = S1Interval(lng_lo, lng_hi);
-  void set_lo(double p) { bounds_[0] = p; DCHECK(is_valid()); }
-  void set_hi(double p) { bounds_[1] = p; DCHECK(is_valid()); }
+  // Only const versions of these methods are provided, since S1Interval
+  // has invariants that must be maintained after each update.
+  double operator[](int i) const { return bounds_[i]; }
+  const Vector2_d& bounds() const { return bounds_; }
 
   // An interval is valid if neither bound exceeds Pi in absolute value,
   // and the value -Pi appears only in the Empty() and Full() intervals.
-  inline bool is_valid() const;
+  bool is_valid() const;
 
   // Return true if the interval contains all points on the unit circle.
-  bool is_full() const { return hi() - lo() == 2 * M_PI; }
+  bool is_full() const { return lo() == -M_PI && hi() == M_PI; }
 
   // Return true if the interval is empty, i.e. it contains no points.
-  bool is_empty() const { return lo() - hi() == 2 * M_PI; }
+  bool is_empty() const { return lo() == M_PI && hi() == -M_PI; }
 
   // Return true if lo() > hi().  (This is true for empty intervals.)
   bool is_inverted() const { return lo() > hi(); }
@@ -119,61 +129,86 @@ class S1Interval {
 
   // Return true if the interval contains the given interval 'y'.
   // Works for empty, full, and singleton intervals.
-  bool Contains(S1Interval const& y) const;
+  bool Contains(const S1Interval& y) const;
 
   // Returns true if the interior of this interval contains the entire
   // interval 'y'.  Note that x.InteriorContains(x) is true only when
   // x is the empty or full interval, and x.InteriorContains(S1Interval(p,p))
   // is equivalent to x.InteriorContains(p).
-  bool InteriorContains(S1Interval const& y) const;
+  bool InteriorContains(const S1Interval& y) const;
 
   // Return true if the two intervals contain any points in common.
   // Note that the point +/-Pi has two representations, so the intervals
   // [-Pi,-3] and [2,Pi] intersect, for example.
-  bool Intersects(S1Interval const& y) const;
+  bool Intersects(const S1Interval& y) const;
 
   // Return true if the interior of this interval contains any point of the
   // interval 'y' (including its boundary).  Works for empty, full, and
   // singleton intervals.
-  bool InteriorIntersects(S1Interval const& y) const;
+  bool InteriorIntersects(const S1Interval& y) const;
 
   // Return the Hausdorff distance to the given interval 'y'. For two
   // S1Intervals x and y, this distance is defined by
   //     h(x, y) = max_{p in x} min_{q in y} d(p, q),
   // where d(.,.) is measured along S1.
-  double GetDirectedHausdorffDistance(S1Interval const& y) const;
+  double GetDirectedHausdorffDistance(const S1Interval& y) const;
 
   // Expand the interval by the minimum amount necessary so that it
   // contains the given point "p" (an angle in the range [-Pi, Pi]).
   void AddPoint(double p);
 
-  // Return an interval that contains all points with a distance "radius" of a
-  // point in this interval.  Note that the expansion of an empty interval is
-  // always empty.  The radius must be non-negative.
-  S1Interval Expanded(double radius) const;
+  // Return the closest point in the interval to the given point "p".
+  // The interval must be non-empty.
+  double Project(double p) const;
+
+  // Return an interval that has been expanded on each side by the given
+  // distance "margin".  If "margin" is negative, then shrink the interval on
+  // each side by "margin" instead.  The resulting interval may be empty or
+  // full.  Any expansion (positive or negative) of a full interval remains
+  // full, and any expansion of an empty interval remains empty.
+  S1Interval Expanded(double margin) const;
 
   // Return the smallest interval that contains this interval and the
   // given interval "y".
-  S1Interval Union(S1Interval const& y) const;
+  S1Interval Union(const S1Interval& y) const;
 
   // Return the smallest interval that contains the intersection of this
   // interval with "y".  Note that the region of intersection may
   // consist of two disjoint intervals.
-  S1Interval Intersection(S1Interval const& y) const;
+  S1Interval Intersection(const S1Interval& y) const;
 
   // Return true if two intervals contains the same set of points.
-  inline bool operator==(S1Interval const& y) const;
+  bool operator==(const S1Interval& y) const;
 
-  // Return true if the length of the symmetric difference between the two
-  // intervals is at most the given tolerance.
-  bool ApproxEquals(S1Interval const& y, double max_error = 1e-15) const;
+  // Return true if this interval can be transformed into the given interval by
+  // moving each endpoint by at most "max_error" (and without the endpoints
+  // crossing, which would invert the interval).  Empty and full intervals are
+  // considered to start at an arbitrary point on the unit circle, thus any
+  // interval with (length <= 2*max_error) matches the empty interval, and any
+  // interval with (length >= 2*Pi - 2*max_error) matches the full interval.
+  bool ApproxEquals(const S1Interval& y, double max_error = 1e-15) const;
+
+  // Low-level methods to modify one endpoint of an existing S1Interval.
+  // These methods should really be private because setting just one endpoint
+  // can violate the invariants maintained by S1Interval.  In particular:
+  //
+  //  - It is not valid to call these methods on an Empty() or Full()
+  //    interval, since these intervals do not have any endpoints.
+  //
+  //  - It is not allowed to set an endpoint to -Pi.  (When these methods are
+  //    used internally, values of -Pi have already been normalized to Pi.)
+  //
+  // The preferred way to modify both endpoints of an interval is to use a
+  // constructor, e.g. lng = S1Interval(lng_lo, lng_hi).
+  void set_lo(double p);
+  void set_hi(double p);
 
  private:
   enum ArgsChecked { ARGS_CHECKED };
 
   // Internal constructor that assumes that both arguments are in the
   // correct range, i.e. normalization from -Pi to Pi is already done.
-  inline S1Interval(double lo, double hi, ArgsChecked dummy);
+  S1Interval(double lo, double hi, ArgsChecked dummy);
 
   // Return true if the interval (which is closed) contains the point 'p'.
   // Skips the normalization of 'p' from -Pi to Pi.
@@ -181,17 +216,16 @@ class S1Interval {
 
   Vector2_d bounds_;
 };
-DECLARE_POD(S1Interval);
 
 inline S1Interval::S1Interval(double lo, double hi) : bounds_(lo, hi) {
   if (lo == -M_PI && hi != M_PI) set_lo(M_PI);
   if (hi == -M_PI && lo != M_PI) set_hi(M_PI);
-  DCHECK(is_valid());
+  S2_DCHECK(is_valid());
 }
 
 inline S1Interval::S1Interval(double lo, double hi, ArgsChecked dummy)
   : bounds_(lo, hi) {
-  DCHECK(is_valid());
+  S2_DCHECK(is_valid());
 }
 
 inline S1Interval::S1Interval() : bounds_(M_PI, -M_PI) {
@@ -206,17 +240,27 @@ inline S1Interval S1Interval::Full() {
 }
 
 inline bool S1Interval::is_valid() const {
-  return (fabs(lo()) <= M_PI && fabs(hi()) <= M_PI &&
+  return (std::fabs(lo()) <= M_PI && std::fabs(hi()) <= M_PI &&
           !(lo() == -M_PI && hi() != M_PI) &&
           !(hi() == -M_PI && lo() != M_PI));
 }
 
-inline bool S1Interval::operator==(S1Interval const& y) const {
+inline bool S1Interval::operator==(const S1Interval& y) const {
   return lo() == y.lo() && hi() == y.hi();
 }
 
-inline ostream& operator<<(ostream& os, S1Interval const& x) {
+inline void S1Interval::set_lo(double p) {
+  bounds_[0] = p;
+  S2_DCHECK(is_valid());
+}
+
+inline void S1Interval::set_hi(double p) {
+  bounds_[1] = p;
+  S2_DCHECK(is_valid());
+}
+
+inline std::ostream& operator<<(std::ostream& os, const S1Interval& x) {
   return os << "[" << x.lo() << ", " << x.hi() << "]";
 }
 
-#endif  // UTIL_GEOMETRY_S1INTERVAL_H_
+#endif  // S2_S1INTERVAL_H_

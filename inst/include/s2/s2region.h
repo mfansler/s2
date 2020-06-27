@@ -1,15 +1,34 @@
 // Copyright 2005 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS-IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 
-#ifndef UTIL_GEOMETRY_S2REGION_H_
-#define UTIL_GEOMETRY_S2REGION_H_
+// Author: ericv@google.com (Eric Veach)
 
-#include "s2.h"
+#ifndef S2_S2REGION_H_
+#define S2_S2REGION_H_
+
+#include <vector>
+
+#include "s2/_fp_contract_off.h"
+#include "s2/s1angle.h"
 
 class Decoder;
 class Encoder;
 
 class S2Cap;
 class S2Cell;
+class S2CellId;
 class S2LatLngRect;
 
 // An S2Region represents a two-dimensional region over the unit sphere.
@@ -21,40 +40,68 @@ class S2LatLngRect;
 // is restricted to methods that are useful for computing approximations.
 class S2Region {
  public:
-  virtual ~S2Region();
+  S2Region() = default;
+  S2Region(const S2Region& other) = default;
+  S2Region& operator=(const S2Region&) = default;
+  virtual ~S2Region() {}
 
-  // Return a deep copy of this region.  If you want to narrow the result to a
-  // specific known region type, use down_cast<T*> from basictypes.h.
-  // Subtypes return pointers to that subtype from their Clone() methods.
+  // Returns a deep copy of the region.
+  //
+  // Note that each subtype of S2Region returns a pointer to an object of its
+  // own type (e.g., S2Cap::Clone() returns an S2Cap*).
   virtual S2Region* Clone() const = 0;
 
-  // Return a bounding spherical cap. This is not guaranteed to be exact.
+  // Returns a bounding spherical cap that contains the region.  The bound may
+  // not be tight.
   virtual S2Cap GetCapBound() const = 0;
 
-  // Return a bounding latitude-longitude rectangle that contains the region.
-  // The bounds are not guaranteed to be tight.
+  // Returns a bounding latitude-longitude rectangle that contains the region.
+  // The bound may not be tight.
   virtual S2LatLngRect GetRectBound() const = 0;
 
-  // If this method returns true, the region completely contains the given
-  // cell.  Otherwise, either the region does not contain the cell or the
-  // containment relationship could not be determined.
-  virtual bool Contains(S2Cell const& cell) const = 0;
+  // Returns a small collection of S2CellIds whose union covers the region.
+  // The cells are not sorted, may have redundancies (such as cells that
+  // contain other cells), and may cover much more area than necessary.
+  //
+  // This method is not intended for direct use by client code.  Clients
+  // should typically use S2RegionCoverer::GetCovering, which has options to
+  // control the size and accuracy of the covering.  Alternatively, if you
+  // want a fast covering and don't care about accuracy, consider calling
+  // S2RegionCoverer::GetFastCovering (which returns a cleaned-up version of
+  // the covering computed by this method).
+  //
+  // GetCellUnionBound() implementations should attempt to return a small
+  // covering (ideally 4 cells or fewer) that covers the region and can be
+  // computed quickly.  The result is used by S2RegionCoverer as a starting
+  // point for further refinement.
+  //
+  // TODO(ericv): Remove the default implementation.
+  virtual void GetCellUnionBound(std::vector<S2CellId> *cell_ids) const;
+
+  // Returns true if the region completely contains the given cell, otherwise
+  // returns false.
+  virtual bool Contains(const S2Cell& cell) const = 0;
 
   // If this method returns false, the region does not intersect the given
   // cell.  Otherwise, either region intersects the cell, or the intersection
   // relationship could not be determined.
-  virtual bool MayIntersect(S2Cell const& cell) const = 0;
+  //
+  // Note that there is currently exactly one implementation of this method
+  // (S2LatLngRect::MayIntersect) that takes advantage of the semantics above
+  // to be more efficient.  For all other S2Region subtypes, this method
+  // returns true if the region intersect the cell and false otherwise.
+  virtual bool MayIntersect(const S2Cell& cell) const = 0;
 
-  // Return true if and only if the given point is contained by the region.
+  // Returns true if and only if the given point is contained by the region.
   // The point 'p' is generally required to be unit length, although some
   // subtypes may relax this restriction.
-  // NOTE: If you will be calling this function on one specific subtype only,
-  // or if performance is a consideration, please use the non-virtual
-  // method Contains(S2Point const& p) declared below!
-  virtual bool VirtualContainsPoint(S2Point const& p) const = 0;
+  virtual bool Contains(const S2Point& p) const = 0;
 
-  // Use encoder to generate a serialized representation of this region.
-  // Assumes that encoder can be enlarged using calls to Ensure(int).
+  //////////////////////////////////////////////////////////////////////////
+  // Many S2Region subtypes also define the following non-virtual methods.
+  //////////////////////////////////////////////////////////////////////////
+
+  // Appends a serialized representation of the region to "encoder".
   //
   // The representation chosen is left up to the sub-classes but it should
   // satisfy the following constraints:
@@ -63,12 +110,16 @@ class S2Region {
   // - Performance, not space, should be the chief consideration. Encode() and
   //   Decode() should be implemented such that the combination is equivalent
   //   to calling Clone().
-  virtual void Encode(Encoder* const encoder) const = 0;
+  //
+  // REQUIRES: "encoder" uses the default constructor, so that its buffer
+  //           can be enlarged as necessary by calling Ensure(int).
+  //
+  // void Encode(Encoder* const encoder) const;
 
-  // Reconstruct a region from the serialized representation generated by
-  // Encode(). Note that since this method is virtual, it requires that a
-  // Region object of the appropriate concrete type has already been
-  // constructed. It is not possible to decode regions of unknown type.
+  // Decodes an S2Region encoded with Encode().  Note that this method
+  // requires that an S2Region object of the appropriate concrete type has
+  // already been constructed.  It is not possible to decode regions of
+  // unknown type.
   //
   // Whenever the Decode method is changed to deal with new serialized
   // representations, it should be done so in a manner that allows for
@@ -76,26 +127,16 @@ class S2Region {
   // representation should be used to decide how to decode the data.
   //
   // Returns true on success.
-  virtual bool Decode(Decoder* const decoder) = 0;
-
-  // Provide the same functionality as Decode, except that decoded regions are
-  // allowed to point directly into the Decoder's memory buffer rather than
-  // copying the data.  This method can be much faster for regions that have
-  // a lot of data (such as polygons), but the decoded region is only valid
-  // within the scope (lifetime) of the Decoder's memory buffer.
-  // Default implementation just calls Decode.
-  virtual bool DecodeWithinScope(Decoder* const decoder);
-
-  /////////////////////////////////////////////////////////////////////////
-  // The following are NON-VIRTUAL methods (for efficiency reasons) that
-  // happen to be implemented by all subclasses.  You cannot call these
-  // methods unless you have an object of a particular subtype.
   //
-  // bool Contains(S2Point const& p) const;
+  // bool Decode(Decoder* const decoder);
+
+  // Provides the same functionality as Decode, except that decoded regions
+  // are allowed to point directly into the Decoder's memory buffer rather
+  // than copying the data.  This method can be much faster for regions that
+  // have a lot of data (such as polygons), but the decoded region is only
+  // valid within the scope (lifetime) of the Decoder's memory buffer.
   //
-  // Return true if and only if the given point is contained by the region.
-  // The point 'p' is generally required to be unit length, although some
-  // subtypes may relax this restriction.
+  // bool DecodeWithinScope(Decoder* const decoder);
 };
 
-#endif  // UTIL_GEOMETRY_S2REGION_H_
+#endif  // S2_S2REGION_H_

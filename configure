@@ -1,4 +1,5 @@
-# Anticonf (tm) script by Jeroen Ooms (2015)
+#!/usr/bin/env bash
+# Anticonf (tm) script by Jeroen Ooms (2020)
 # This script will query 'pkg-config' for the required cflags and ldflags.
 # If pkg-config is unavailable or does not find the library, try setting
 # INCLUDE_DIR and LIB_DIR manually via e.g:
@@ -9,26 +10,26 @@ PKG_CONFIG_NAME="openssl"
 PKG_DEB_NAME="libssl-dev"
 PKG_RPM_NAME="openssl-devel"
 PKG_CSW_NAME="libssl_dev"
-PKG_BREW_NAME="openssl"
+PKG_BREW_NAME="openssl@1.1"
 PKG_TEST_FILE="tools/version.c"
 PKG_LIBS="-lssl -lcrypto"
-PKG_CXXFLAGS=""
+PKG_CFLAGS=""
 
 # Use pkg-config if available
 pkg-config ${PKG_CONFIG_NAME} --atleast-version=1.0  2>/dev/null
 if [ $? -eq 0 ]; then
-  PKGCONFIG_CXXFLAGS=`pkg-config --cflags ${PKG_CONFIG_NAME}`
+  PKGCONFIG_CFLAGS=`pkg-config --cflags ${PKG_CONFIG_NAME}`
   PKGCONFIG_LIBS=`pkg-config --libs ${PKG_CONFIG_NAME}`
 fi
 
 # Note that cflags may be empty in case of success
 if [ "$INCLUDE_DIR" ] || [ "$LIB_DIR" ]; then
   echo "Found INCLUDE_DIR and/or LIB_DIR!"
-  PKG_CXXFLAGS="-I$INCLUDE_DIR $PKG_CXXFLAGS"
+  PKG_CFLAGS="-I$INCLUDE_DIR $PKG_CFLAGS"
   PKG_LIBS="-L$LIB_DIR $PKG_LIBS"
-elif [ "$PKGCONFIG_CXXFLAGS" ] || [ "$PKGCONFIG_LIBS" ]; then
+elif [ "$PKGCONFIG_CFLAGS" ] || [ "$PKGCONFIG_LIBS" ]; then
   echo "Found pkg-config cflags and libs!"
-  PKG_CXXFLAGS=${PKGCONFIG_CXXFLAGS}
+  PKG_CFLAGS=${PKGCONFIG_CFLAGS}
   PKG_LIBS=${PKGCONFIG_LIBS}
 else
   case "$OSTYPE" in "darwin"*)
@@ -36,35 +37,29 @@ else
   if [ $? -eq 0 ]; then
     BREWDIR=`brew --prefix`
   else
-    curl -sfL https://jeroen.github.io/autobrew/$PKG_BREW_NAME > autobrew
+    curl -sfL "https://autobrew.github.io/scripts/$PKG_BREW_NAME" > autobrew
     source autobrew
   fi
-  PKG_CXXFLAGS="-I$BREWDIR/opt/$PKG_BREW_NAME/include"
-  PKG_LIBS="-L$BREWDIR/opt/$PKG_BREW_NAME/lib $PKG_LIBS"
+  PKG_CFLAGS="-I$BREWDIR/opt/openssl@1.1/include -I$BREWDIR/opt/openssl/include"
+  PKG_LIBS="-L$BREWDIR/opt/openssl@1.1/lib -L$BREWDIR/opt/openssl/lib $PKG_LIBS"
   ;;
   esac
 fi
 
-# Add PIC flag for shared lib
-# CXX1XPICFLAGS=`${R_HOME}/bin/R CMD config CXX1XPICFLAGS`
-# PKG_CXXFLAGS="$PKG_CXXFLAGS $CXX1XPICFLAGS"
-
-# For debugging
-echo "Using PKG_CXXFLAGS=$PKG_CXXFLAGS"
-echo "Using PKG_LIBS=$PKG_LIBS"
-
 # Find compiler
-CXX11VAR=`${R_HOME}/bin/Rscript -e 'if(getRversion() < "3.4") cat("CXX1X") else cat("CXX11")'`
-CXX1X=`${R_HOME}/bin/R CMD config "${CXX11VAR}"`
-CXX1XFLAGS=`${R_HOME}/bin/R CMD config "${CXX11VAR}FLAGS"`
+CC=`${R_HOME}/bin/R CMD config CC`
+CFLAGS=`${R_HOME}/bin/R CMD config CFLAGS`
 CPPFLAGS=`${R_HOME}/bin/R CMD config CPPFLAGS`
 
+# For debugging
+echo "Using PKG_CFLAGS=$PKG_CFLAGS"
+
 # Test configuration
-${CXX1X} ${CPPFLAGS} ${PKG_CXXFLAGS} ${CXX1XFLAGS} -E ${PKG_TEST_FILE} >/dev/null 2>&1
+${CC} ${CPPFLAGS} ${PKG_CFLAGS} ${CFLAGS} -E ${PKG_TEST_FILE} >/dev/null 2>configure.log
 
 # Customize the error
 if [ $? -ne 0 ]; then
-  echo "------------------------- ANTICONF ERROR ---------------------------"
+  echo "--------------------------- [ANTICONF] --------------------------------"
   echo "Configuration failed because $PKG_CONFIG_NAME was not found. Try installing:"
   echo " * deb: $PKG_DEB_NAME (Debian, Ubuntu, etc)"
   echo " * rpm: $PKG_RPM_NAME (Fedora, CentOS, RHEL)"
@@ -74,12 +69,41 @@ if [ $? -ne 0 ]; then
   echo "PATH and PKG_CONFIG_PATH contains a $PKG_CONFIG_NAME.pc file. If pkg-config"
   echo "is unavailable you can set INCLUDE_DIR and LIB_DIR manually via:"
   echo "R CMD INSTALL --configure-vars='INCLUDE_DIR=... LIB_DIR=...'"
+  echo "-------------------------- [ERROR MESSAGE] ---------------------------"
+  cat configure.log
   echo "--------------------------------------------------------------------"
-  exit 1;
+  exit 1
 fi
 
+# Try to link against the correct OpenSSL version
+if [ -z "$AUTOBREW" ]; then
+SONAME=`${CC} -E ${PKG_CFLAGS} src/tests/soname.h | sh | xargs`
+if [ "$SONAME" ]; then
+case "$OSTYPE" in
+  "darwin"*)
+  PKG_LIBS_VERSIONED=`echo "${PKG_LIBS}" | sed "s/-lssl/-lssl.${SONAME}/" | sed "s/-lcrypto/-lcrypto.${SONAME}/"`
+  ;;
+  *)
+  PKG_LIBS_VERSIONED=`echo "${PKG_LIBS}" | sed "s/-lssl/-l:libssl.so.${SONAME}/" | sed "s/-lcrypto/-l:libcrypto.so.${SONAME}/"`
+  ;;
+esac
+
+# Test if versioned linking works
+${CC} ${PKG_CFLAGS} src/tests/main.c ${PKG_LIBS_VERSIONED} -o src/main.exe 2>/dev/null
+if [ $? -eq 0 ]; then PKG_LIBS="${PKG_LIBS_VERSIONED}"; fi
+
+# Suppress opensslv3 warnings for now
+if [ "$SONAME" = "3" ]; then
+PKG_CFLAGS="$PKG_CFLAGS -DOPENSSL_SUPPRESS_DEPRECATED"
+fi
+
+fi #SONAME
+fi #AUTOBREW
+
+echo "Using PKG_LIBS=$PKG_LIBS"
+
 # Write to Makevars
-sed -e "s|@cxxflags@|$PKG_CXXFLAGS|" -e "s|@libs@|$PKG_LIBS|" src/Makevars.in > src/Makevars
+sed -e "s|@cflags@|$PKG_CFLAGS|" -e "s|@libs@|$PKG_LIBS|" src/Makevars.in > src/Makevars
 
 # Success
 exit 0
