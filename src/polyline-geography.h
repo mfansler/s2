@@ -2,6 +2,8 @@
 #ifndef POLYLINE_GEOGRAPHY_H
 #define POLYLINE_GEOGRAPHY_H
 
+#include "s2/s2latlng_rect.h"
+
 #include "geography.h"
 
 // This class handles (vectors of) polylines (LINESTRING and MULTILINESTRING)
@@ -27,6 +29,16 @@ public:
     }
 
     return numPoints;
+  }
+
+  bool IsEmpty() {
+    for (size_t i = 0; i < this->polylines.size(); i++) {
+      if (this->polylines[i]->num_vertices() > 0) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   double Area() {
@@ -63,6 +75,16 @@ public:
     return output;
   }
 
+  S2LatLngRect GetRectBound() {
+	S2LatLngRect rect; 
+	if (this->polylines.size())
+		rect = this->polylines[0]->GetRectBound();
+    for (size_t i = 1; i < this->polylines.size(); i++) {
+        rect.Union(this->polylines[i]->GetRectBound()); // depends on order
+    }
+	return rect;
+  }
+
   std::unique_ptr<Geography> Boundary() {
     std::vector<S2Point> endpoints;
     for (size_t i = 0; i < this->polylines.size(); i++) {
@@ -71,7 +93,7 @@ public:
         endpoints.push_back(this->polylines[i]->vertex(1));
       }
     }
-    
+
     return absl::make_unique<PointGeography>(endpoints);
   }
 

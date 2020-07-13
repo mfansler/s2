@@ -7,8 +7,10 @@
 #include "s2/s2polyline.h"
 #include "s2/s2polygon.h"
 #include "s2/s2shape_index.h"
+#include "s2/s2shape_index_region.h"
 #include "s2/mutable_s2shape_index.h"
 #include "s2/s2point_vector_shape.h"
+#include "s2/s2cap.h"
 #include "wk/geometry-handler.hpp"
 #include <Rcpp.h>
 
@@ -25,8 +27,9 @@ public:
   virtual bool IsCollection() = 0;
   // Returns 0 for point, 1 for line, 2 for polygon
   virtual int Dimension() = 0;
-  // Returns the number of unique points in the input
+  // Returns the number of points in the input
   virtual int NumPoints() = 0;
+  virtual bool IsEmpty() = 0;
   virtual double Area() = 0;
   virtual double Length() = 0;
   virtual double Perimeter() = 0;
@@ -55,6 +58,19 @@ public:
     }
 
     return &this->shape_index_;
+  }
+
+  virtual S2ShapeIndexRegion<S2ShapeIndex> ShapeIndexRegion() {
+	S2ShapeIndex *ix = this->ShapeIndex();
+	return MakeS2ShapeIndexRegion(ix);
+  }
+
+  virtual S2Cap GetCapBound() {
+	return this->ShapeIndexRegion().GetCapBound();
+  }
+
+  virtual S2LatLngRect GetRectBound() {
+	return this->ShapeIndexRegion().GetRectBound();
   }
 
 protected:

@@ -274,6 +274,15 @@ inline void sized_delete_array(void *ptr, size_t size) {
 // -----------------------------------------------------------------------------
 
 // IS_LITTLE_ENDIAN, IS_BIG_ENDIAN
+
+// Allow compiler -D defines to override detection here
+// which occasionally fails (e.g., on CRAN Solaris)
+#if defined(IS_LITTLE_ENDIAN)
+#undef IS_BIG_ENDIAN
+#elif defined(IS_BIG_ENDIAN)
+#undef IS_LITTLE_ENDIAN
+#else
+
 #if defined __linux__ || defined OS_ANDROID || defined(__ANDROID__)
 // TODO(user): http://b/21460321; use one of OS_ANDROID or __ANDROID__.
 // _BIG_ENDIAN
@@ -318,6 +327,7 @@ inline void sized_delete_array(void *ptr, size_t size) {
 
 #endif  // __BYTE_ORDER
 #endif  // _MSC_VER
+#endif // #if defined(IS_LITTLE_ENDIAN) ... #else
 
 // byte swap functions (bswap_16, bswap_32, bswap_64).
 
@@ -890,7 +900,7 @@ inline void UnalignedCopy64(const void *src, void *dst) {
      ((__GNUC__ >= 3 || defined(__clang__)) && defined(__ANDROID__)) || \
      defined(__ASYLO__))
 inline void *aligned_malloc(size_t size, size_t minimum_alignment) {
-#if defined(__ANDROID__) || defined(OS_ANDROID) || defined(__ASYLO__) || defined(_WIN32)
+#if defined(__ANDROID__) || defined(OS_ANDROID) || defined(__ASYLO__) || defined(_WIN32)  || defined(__sun) || defined(sun)
 # if defined(_WIN32)
   return _aligned_malloc(size, minimum_alignment);
 # else
