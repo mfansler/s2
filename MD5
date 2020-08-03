@@ -1,13 +1,13 @@
-9e246e21c140f6a989ee50e4e451eab2 *DESCRIPTION
+de2b1c7b2c3bacac7eee6da28af0a3e8 *DESCRIPTION
 5129788c48d634be1089286a041d824a *NAMESPACE
-60975d399700924810bd2e7c876e793e *NEWS.md
+5a0fb883a201b865637837bbe182ca7c *NEWS.md
 642ce58267667a0e06da78dca3da48fc *R/RcppExports.R
 8567a6b7a3c75cad01a581303546fced *R/data.R
 8aa358cca3ffcc922b9bde02ef1accd4 *R/s2-accessors.R
 4ba8ec7d16efeadbc21c3ab5ac3dc6a6 *R/s2-bounds.R
 e76a06c9538548ff7f0121b695bd2ff0 *R/s2-constructors-formatters.R
 65c980864e9352d1105149e9cc47c7ef *R/s2-earth.R
-8cb12e31fd4d2a5f04d93fec3bde96b9 *R/s2-geography.R
+91a1130c26bee4acd763c166b575a931 *R/s2-geography.R
 71812b93ee4d9ddbd5ce0006db9509a2 *R/s2-lnglat.R
 11b87d96773046950186957f2af9478b *R/s2-matrix.R
 e10121cec72be69c2500e9121fcc128e *R/s2-options.R
@@ -128,7 +128,7 @@ e819c0019ab31b8a7772353a762f6439 *inst/include/s2/s2predicates_internal.h
 fa7c158fb73fced84c86e73bc40a4215 *inst/include/s2/s2projections.h
 eef1eb7446a79b5b6430af8eede7a698 *inst/include/s2/s2r2rect.h
 2234c6d0d865cc61ca6959c01e0015e4 *inst/include/s2/s2region.h
-a47fff7b3f993ee13d207d62de760ef4 *inst/include/s2/s2region_coverer.h
+64f8f1de545faf4dcafdb206cfca2bf6 *inst/include/s2/s2region_coverer.h
 bc10b64ffa44cbe8566d7daf5fb025b8 *inst/include/s2/s2region_intersection.h
 24e9c6bee5ce52ebbf1307333d70301a *inst/include/s2/s2region_term_indexer.h
 05b971668fa80d8d89579ad964aa7f27 *inst/include/s2/s2region_union.h
@@ -208,7 +208,7 @@ d02fbefd15c14ec0bd673853a526bfc8 *inst/include/s2/util/endian/endian.h
 fb878c4cc124f8cd73ff043b9fe9e278 *inst/include/s2/util/gtl/btree_container.h
 52e6fdc3fa81363e043d7e5a35a697ef *inst/include/s2/util/gtl/btree_map.h
 81e2de007193adce24cd9d5f5739bf5e *inst/include/s2/util/gtl/btree_set.h
-33ad2ebb93a021fd2dfd39c13b6f8968 *inst/include/s2/util/gtl/compact_array.h
+29d3a30325dc78051b3aa1b812fb71c7 *inst/include/s2/util/gtl/compact_array.h
 a05aa6118ec536e2715ce0089096d564 *inst/include/s2/util/gtl/container_logging.h
 524152483057734236c014aaf39cabe3 *inst/include/s2/util/gtl/dense_hash_set.h
 e6d5083ac705a0300e77fe096a7a0589 *inst/include/s2/util/gtl/densehashtable.h
@@ -224,7 +224,7 @@ b0a3631c4d2beb9b19d9e3a0639c0cf0 *inst/include/s2/util/math/exactfloat/exactfloa
 1bdf37d9bef7eba2b40d5baad2403f8d *inst/include/s2/util/units/length-units.h
 a5add3e948f775d2f77331e97b5398ea *inst/include/s2/util/units/physical-units.h
 400af05643ac08d897c2100a0a68f1aa *inst/include/s2/value_lexicon.h
-fb4bec01f9cc07b117c0238dfcdd8dfd *man/as_s2_geography.Rd
+cc12daaa011b81c2e5e21d21c8813445 *man/as_s2_geography.Rd
 0d32af4cce70305a4ad68adb26e7c89f *man/s2-package.Rd
 0814caa3efd1d23d1a02cd3da15d3424 *man/s2_boundary.Rd
 a906d7f9956940ceebe0bd879c14e5f2 *man/s2_bounds_cap.Rd
@@ -330,7 +330,7 @@ ff7549a0d6195b34b24867fff4cc6d06 *src/s2/s2predicates.cc
 7478e1714d9dcaf520159458d10e383b *src/s2/s2projections.cc
 8baa87c45aa11148a5207f367237e753 *src/s2/s2r2rect.cc
 57778c7c84ae75e67ed68e76f9026ec0 *src/s2/s2region.cc
-cbf91de66d9f1d8380317ab5fcbf26a1 *src/s2/s2region_coverer.cc
+cfc92b8d78c68ae15377d9e1c5a8df13 *src/s2/s2region_coverer.cc
 f622c31665d97c607e1cb5106c295959 *src/s2/s2region_intersection.cc
 b41c960fdbefe867c01ee524e3929d3f *src/s2/s2region_term_indexer.cc
 f8232c70a590ed11666c93181c9d7343 *src/s2/s2region_union.cc
@@ -385,7 +385,7 @@ a9ffa55303a6dcba9c5c9c9d322e2009 *tests/area.R
 589616aabb1c291a3984f521274815bf *tests/testthat/test-s2-options.R
 9be8d6955daa3c211af562f4f41c639a *tests/testthat/test-s2-point.R
 0688d88be5a5f999507d227ee30c99dc *tests/testthat/test-s2-predicates.R
-4413a09239225026cc484f23d39c286c *tests/testthat/test-s2-transformers.R
+b7505b66cb1b1b254137ebd00c86c225 *tests/testthat/test-s2-transformers.R
 2286964671d2c59567760afc3b651d48 *tests/testthat/test-s2-xptr.R
 28f67bf7ece751b0003f0cb923fefa24 *tests/testthat/test-utils.R
 960c0d7e6a792c605d49ccfe2ac6a968 *tests/testthat/test-vctrs.R

@@ -1,3 +1,7 @@
+# s2 1.0.2
+
+* Fixed CRAN check errors (#71, #75, #72).
+
 # s2 1.0.1
 
 * Added layer creation options to `s2_options()`, which now uses strings
