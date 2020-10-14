@@ -1,6 +1,6 @@
-de2b1c7b2c3bacac7eee6da28af0a3e8 *DESCRIPTION
+9f7c403b701d4ada0bd7ad7c62b9fe60 *DESCRIPTION
 5129788c48d634be1089286a041d824a *NAMESPACE
-5a0fb883a201b865637837bbe182ca7c *NEWS.md
+5a0ae3a4ac84b54a7bf4a1e4ce5ace6a *NEWS.md
 642ce58267667a0e06da78dca3da48fc *R/RcppExports.R
 8567a6b7a3c75cad01a581303546fced *R/data.R
 8aa358cca3ffcc922b9bde02ef1accd4 *R/s2-accessors.R
@@ -15,11 +15,11 @@ e10121cec72be69c2500e9121fcc128e *R/s2-options.R
 e78c2f5f3bc790e3fa91d3f5e037754e *R/s2-point.R
 447d319c0cbec576de0695a518292089 *R/s2-predicates.R
 382b5047b50a837dee2795239ec216ad *R/s2-transformers.R
-81efb233c21d57d98776ea5d87465e18 *R/s2-xptr.R
+28d0bdc778944f01d0203a6083305b1a *R/s2-xptr.R
 4e8bc5586b795db8a2f8e65074ad05c1 *R/utils.R
 514ae694f7596f697979c5cbce1fbc37 *R/vctrs.R
 474285eb7c0d146036962c8f7248d1bb *R/zzz.R
-7cc9c2964dbbd61734fb19e9b65358e9 *README.md
+e23e60fc0aa6a0f4143087b680b435cf *README.md
 cc6eebf14a3f516ec74168f3ea416fb2 *cleanup
 2dbdcda51defc3644addc70332b83007 *configure
 d41d8cd98f00b204e9800998ecf8427e *configure.win
@@ -40,7 +40,7 @@ c71fa2b58596fe3acc23b3191fb30c01 *inst/include/s2/base/stringprintf.h
 a5325b3b1a8569a91a072858d9961a76 *inst/include/s2/base/strtoint.h
 8a23b88128feaefecac82381870b7e1b *inst/include/s2/base/timer.h
 5c886186eca3428ebe67594a29a43066 *inst/include/s2/encoded_s2cell_id_vector.h
-c1bb4073ffc984013ceb732fe80dd9e6 *inst/include/s2/encoded_s2point_vector.h
+f20c096d5c4d4272d6160b94321986e8 *inst/include/s2/encoded_s2point_vector.h
 8c71134bbac741ab14ad58645c587efd *inst/include/s2/encoded_s2shape_index.h
 90dca9b7842ad1910d1de858afad423c *inst/include/s2/encoded_string_vector.h
 40708275f82de6dd1d212c57c36ecee8 *inst/include/s2/encoded_uint_vector.h
@@ -386,7 +386,7 @@ a9ffa55303a6dcba9c5c9c9d322e2009 *tests/area.R
 9be8d6955daa3c211af562f4f41c639a *tests/testthat/test-s2-point.R
 0688d88be5a5f999507d227ee30c99dc *tests/testthat/test-s2-predicates.R
 b7505b66cb1b1b254137ebd00c86c225 *tests/testthat/test-s2-transformers.R
-2286964671d2c59567760afc3b651d48 *tests/testthat/test-s2-xptr.R
+e0de43269c8f8eb622ef3aa6c6d6f01a *tests/testthat/test-s2-xptr.R
 28f67bf7ece751b0003f0cb923fefa24 *tests/testthat/test-utils.R
 960c0d7e6a792c605d49ccfe2ac6a968 *tests/testthat/test-vctrs.R
 0ec27c181a66ce5b72bc8c3940e9e00e *tools/version.c

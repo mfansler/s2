@@ -1,3 +1,7 @@
+# s2 1.0.3
+
+* Fixed CRAN check errors (#80).
+
 # s2 1.0.2
 
 * Fixed CRAN check errors (#71, #75, #72).
