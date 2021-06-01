@@ -72,6 +72,23 @@ s2_is_collection <- function(x) {
 
 #' @rdname s2_is_collection
 #' @export
+s2_is_valid <- function(x) {
+  cpp_s2_is_valid(as_s2_geography(x, check = FALSE))
+}
+
+#' @rdname s2_is_collection
+#' @export
+s2_is_valid_detail <- function(x) {
+  x <- as_s2_geography(x, check = FALSE)
+  data.frame(
+    is_valid = cpp_s2_is_valid(x),
+    reason = cpp_s2_is_valid_reason(x),
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @rdname s2_is_collection
+#' @export
 s2_dimension <- function(x) {
   cpp_s2_dimension(as_s2_geography(x))
 }
@@ -119,6 +136,22 @@ s2_x <- function(x) {
 #' @export
 s2_y <- function(x) {
   cpp_s2_y(as_s2_geography(x))
+}
+
+# document these with the other linear referencers
+#' @rdname s2_interpolate
+#' @export
+s2_project <- function(x, y, radius = s2_earth_radius_meters()) {
+  recycled <- recycle_common(as_s2_geography(x), as_s2_geography(y), radius)
+  length <- cpp_s2_length(recycled[[1]]) * radius
+  cpp_s2_project_normalized(recycled[[1]], recycled[[2]]) * length
+}
+
+#' @rdname s2_interpolate
+#' @export
+s2_project_normalized <- function(x, y) {
+  recycled <- recycle_common(as_s2_geography(x), as_s2_geography(y))
+  cpp_s2_project_normalized(recycled[[1]], recycled[[2]])
 }
 
 #' @rdname s2_is_collection

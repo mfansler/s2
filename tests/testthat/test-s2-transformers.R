@@ -225,6 +225,32 @@ test_that("s2_union(x) works", {
   )
 })
 
+test_that("s2_union(x) works with polygons that have overlapping input regions", {
+  # two outer loops
+  txt <- "MULTIPOLYGON (((0 0, 0 1, 1 1, 1 0, 0 0)), ((0.1 0.9, 0.1 1.9, 1.1 1.9, 1.1 0.9, 0.1 0.9)))"
+  # geos::geos_unary_union(txt) %>% as_wkb() %>% s2_area(radius = 1)
+  unioned <- s2_union(as_s2_geography(txt, check = F))
+  expect_equal(s2_area(unioned, radius = 1), 0.0005817275)
+
+  # two outer loops, one valid inner loop
+  # geos::geos_unary_union(txt2) %>% as_wkb() %>% s2_area(radius = 1)
+  txt2 <- "MULTIPOLYGON (
+    ((0 0, 0 1, 1 1, 1 0, 0 0), (0.1 0.1, 0.5 0.1, 0.5 0.5, 0.1 0.5, 0.1 0.1)),
+    ((0.1 0.9, 0.1 1.9, 1.1 1.9, 1.1 0.9, 0.1 0.9))
+  )"
+  unioned <- s2_union(as_s2_geography(txt2, check = F))
+  expect_equal(s2_area(unioned, radius = 1), 0.0005329892)
+})
+
+test_that("s2_union(x) errors for the case of mixed dimension collections", {
+  expect_error(
+    s2_union(
+      c("GEOMETRYCOLLECTION(POLYGON ((-10 -10, -10 10, 10 10, 10 -10, -10 -10)), LINESTRING (0 -20, 0 20))")
+    ),
+    "Unary union for collections is not implemented"
+  )
+})
+
 test_that("s2_union(x, y) works", {
   expect_wkt_equal(s2_union("POINT (30 10)", "POINT EMPTY"), "POINT (30 10)")
   expect_wkt_equal(s2_union("POINT EMPTY", "POINT EMPTY"), "GEOMETRYCOLLECTION EMPTY")
@@ -289,7 +315,7 @@ test_that("binary operations use layer creation options", {
   )
 
   expect_wkt_equal(
-    s2_union_agg(
+    s2_coverage_union_agg(
       "LINESTRING (0 0, 0 1, 0 2, 0 1, 0 3)",
       options = s2_options(polyline_type = "path", polyline_sibling_pairs = "discard")
     ),
@@ -297,11 +323,30 @@ test_that("binary operations use layer creation options", {
   )
   expect_true(
     s2_is_collection(
-      s2_union_agg(
+      s2_coverage_union_agg(
         "LINESTRING (0 0, 0 1, 0 2, 0 1, 0 3)",
         options = s2_options(polyline_type = "walk")
       )
     )
+  )
+})
+
+test_that("s2_coverage_union_agg() works", {
+  expect_wkt_equal(s2_coverage_union_agg(c("POINT (30 10)", "POINT EMPTY")), "POINT (30 10)")
+  expect_wkt_equal(s2_coverage_union_agg(c("POINT EMPTY", "POINT EMPTY")), "GEOMETRYCOLLECTION EMPTY")
+
+  # NULL handling
+  expect_identical(
+    s2_coverage_union_agg(c("POINT (30 10)", NA), na.rm = FALSE),
+    as_s2_geography(NA_character_)
+  )
+  expect_wkt_equal(
+    s2_coverage_union_agg(character()),
+    as_s2_geography("GEOMETRYCOLLECTION EMPTY")
+  )
+  expect_wkt_equal(
+    s2_coverage_union_agg(c("POINT (30 10)", NA), na.rm = TRUE),
+    "POINT (30 10)"
   )
 })
 
@@ -311,11 +356,34 @@ test_that("s2_union_agg() works", {
 
   # NULL handling
   expect_identical(
-    s2_union_agg(c("POINT (30 10)", NA), na.rm = FALSE),
+    s2_coverage_union_agg(c("POINT (30 10)", NA), na.rm = FALSE),
     as_s2_geography(NA_character_)
   )
   expect_wkt_equal(
-    s2_union_agg(c("POINT (30 10)", NA), na.rm = TRUE),
+    s2_coverage_union_agg(character()),
+    as_s2_geography("GEOMETRYCOLLECTION EMPTY")
+  )
+  expect_wkt_equal(
+    s2_coverage_union_agg(c("POINT (30 10)", NA), na.rm = TRUE),
+    "POINT (30 10)"
+  )
+})
+
+test_that("s2_rebuild_agg() works", {
+  expect_wkt_equal(s2_rebuild_agg(c("POINT (30 10)", "POINT EMPTY")), "POINT (30 10)")
+  expect_wkt_equal(s2_rebuild_agg(c("POINT EMPTY", "POINT EMPTY")), "GEOMETRYCOLLECTION EMPTY")
+
+  # NULL handling
+  expect_identical(
+    s2_coverage_union_agg(c("POINT (30 10)", NA), na.rm = FALSE),
+    as_s2_geography(NA_character_)
+  )
+  expect_wkt_equal(
+    s2_rebuild_agg(character()),
+    as_s2_geography("GEOMETRYCOLLECTION EMPTY")
+  )
+  expect_wkt_equal(
+    s2_rebuild_agg(c("POINT (30 10)", NA), na.rm = TRUE),
     "POINT (30 10)"
   )
 })
@@ -470,6 +538,16 @@ test_that("s2_rebuild() works", {
       )
     )
   )
+
+  # dimension
+  expect_true(
+    s2_is_empty(
+      s2_rebuild(
+        "LINESTRING (0 0, 0 1, 0 2, 0 1, 0 3)",
+        s2_options(dimensions = c("point", "polygon"))
+      )
+    )
+  )
 })
 
 test_that("real data survives the S2BooleanOperation", {
@@ -480,7 +558,7 @@ test_that("real data survives the S2BooleanOperation", {
 
   for (continent in unique(s2::s2_data_tbl_countries$continent)) {
     # this is primarily a test of the S2BooleanOperation -> Geography constructor
-    unioned <- expect_is(s2_union_agg(s2_data_countries(continent)), "s2_geography")
+    unioned <- expect_is(s2_coverage_union_agg(s2_data_countries(continent)), "s2_geography")
 
     # this is a test of Geography::Export() on potentially complex polygons
     exported <- expect_length(s2_as_binary(unioned), 1)
@@ -496,4 +574,31 @@ test_that("real data survives the S2BooleanOperation", {
     expect_equal(s2_num_points(reloaded), s2_num_points(unioned))
     expect_equal(s2_area(reloaded, radius = 1), s2_area(unioned, radius = 1))
   }
+})
+
+test_that("s2_interpolate() and s2_interpolate_normalized() work", {
+  expect_identical(
+    s2_as_text(
+      s2_interpolate_normalized("LINESTRING (0 0, 0 60)", c(0, 0.25, 0.75, 1, NA)),
+      precision = 5
+    ),
+    c("POINT (0 0)", "POINT (0 15)", "POINT (0 45)", "POINT (0 60)", NA)
+  )
+
+  expect_identical(
+    s2_as_text(
+      s2_interpolate("LINESTRING (0 0, 0 60)", c(0, 0.25, 0.75, 1, NA) * pi / 3, radius = 1),
+      precision = 5
+    ),
+    c("POINT (0 0)", "POINT (0 15)", "POINT (0 45)", "POINT (0 60)", NA)
+  )
+
+  expect_error(
+    s2_interpolate_normalized("POINT (0 1)", 1),
+    "must be a polyline"
+  )
+  expect_error(
+    s2_interpolate_normalized("MULTILINESTRING ((0 1, 1 1), (1 1, 1 2))", 1),
+    "must be a simple geography"
+  )
 })

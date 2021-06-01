@@ -6,6 +6,7 @@ CXX_STD = CXX11
 OBJECTS = cpp-compat.o \
      s2-accessors.o \
      s2-bounds.o \
+     s2-cell.o \
      s2-constructors-formatters.o \
      s2-predicates.o \
      s2-transformers.o \
@@ -16,6 +17,9 @@ OBJECTS = cpp-compat.o \
      s2-matrix.o \
      s2-point.o \
      s2-xptr.o \
+     wk-impl.o \
+     wk-c-utils.o \
+     s2-c-api.o \
      s2/base/stringprintf.o \
      s2/base/strtoint.o \
      s2/encoded_s2cell_id_vector.o \

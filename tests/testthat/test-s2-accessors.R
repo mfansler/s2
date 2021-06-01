@@ -16,6 +16,58 @@ test_that("s2_is_collection works", {
   )
 })
 
+test_that("s2_is_valid() works", {
+  expect_identical(
+    s2_is_valid(
+      c(
+        # valid
+        "POINT (0 1)", "LINESTRING (0 0, 1 1)", "POLYGON ((0 0, 0 1, 1 0, 0 0))",
+        "GEOMETRYCOLLECTION (POINT (0 1))",
+        # (for the purposes of S2, linestrings that cross aren't considered invalid
+        # in the sense that they won't cause errors when you try to pass them to
+        # a boolean operation or the builder)
+        # invalid
+        "LINESTRING (0 0, 0 0, 1 1)",
+        "POLYGON ((0 0, 0 1, 1 0, 0 0, 0 0))",
+        "GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 0, 0 0, 0 0)))",
+        NA
+      )
+    ),
+    c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, NA)
+  )
+})
+
+test_that("s2_is_valid_detail() works", {
+  expect_identical(
+    s2_is_valid_detail(
+      c(
+        # valid
+        "POINT (0 1)", "LINESTRING (0 0, 1 1)", "POLYGON ((0 0, 0 1, 1 0, 0 0))",
+        "GEOMETRYCOLLECTION (POINT (0 1))",
+        # (for the purposes of S2, linestrings that cross aren't considered invalid
+        # in the sense that they won't cause errors when you try to pass them to
+        # a boolean operation or the builder)
+        # invalid
+        "LINESTRING (0 0, 0 0, 1 1)",
+        "POLYGON ((0 0, 0 1, 1 0, 0 0, 0 0))",
+        "GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 0, 0 0, 0 0)))",
+        NA
+      )
+    ),
+    data.frame(
+      is_valid = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, NA),
+      reason = c(
+        NA, NA, NA, NA,
+        "Vertices 0 and 1 are identical",
+        "Loop 0: Edge 3 is degenerate (duplicate vertex)",
+        "Loop 0: Edge 3 is degenerate (duplicate vertex)",
+        NA
+      ),
+      stringsAsFactors = FALSE
+    )
+  )
+})
+
 test_that("s2_dimension works", {
   expect_identical(s2_dimension(NA_character_), NA_integer_)
   expect_identical(s2_dimension("POINT EMPTY"), 0L)
@@ -88,6 +140,38 @@ test_that("s2_x and s2_y works", {
   expect_error(s2_y("LINESTRING EMPTY"), "Can't compute")
   expect_error(s2_x("POLYGON EMPTY"), "Can't compute")
   expect_error(s2_y("POLYGON EMPTY"), "Can't compute")
+})
+
+test_that("s2_project() and s2_project_normalized() work", {
+  expect_equal(
+    s2_project(
+      "LINESTRING (0 0, 0 90)",
+      c("POINT (0 0)", "POINT (0 22.5)", "POINT (0 67.5)", "POINT (0 90)", NA),
+      radius = 1
+    ),
+    c(0, 0.25, 0.75, 1, NA_real_) * pi / 2
+  )
+
+  expect_equal(
+    s2_project_normalized(
+      "LINESTRING (0 0, 0 90)",
+      c("POINT (0 0)", "POINT (0 22.5)", "POINT (0 67.5)", "POINT (0 90)", "POINT EMPTY", NA)
+    ),
+    c(0, 0.25, 0.75, 1, NA_real_, NA_real_)
+  )
+
+  expect_error(
+    s2_project_normalized("POINT (0 1)", "POINT (0 1)"),
+    "must be a polyline"
+  )
+  expect_error(
+    s2_project_normalized("LINESTRING (0 1, 1 1)", "LINESTRING (0 1, 1 1)"),
+    "must be a point"
+  )
+  expect_error(
+    s2_project_normalized("LINESTRING (0 1, 1 1)", "MULTIPOINT (0 1, 1 1)"),
+    "must both be simple geographies"
+  )
 })
 
 test_that("s2_distance works", {
