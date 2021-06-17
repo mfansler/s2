@@ -1,6 +1,6 @@
-e8f1f3560440f1906b53af7f73d47014 *DESCRIPTION
+510db889afdf3040684de8590e88b6bb *DESCRIPTION
 c2cf7412597f5a006b397f17534e4926 *NAMESPACE
-02652f284e8f6b82aff10ae56e220ff9 *NEWS.md
+f89feca5a36f42c8075d2aff7e06b83a *NEWS.md
 c2684d1f0a404bc345a324f7da698415 *R/RcppExports.R
 8567a6b7a3c75cad01a581303546fced *R/data.R
 b783a368a460bcae5d174c575d863e59 *R/s2-accessors.R
@@ -21,8 +21,8 @@ e78c2f5f3bc790e3fa91d3f5e037754e *R/s2-point.R
 f47605a30d14896490f2b587097b7d64 *R/vctrs.R
 9c82a07787347c391042dbb9b1c7fabe *R/wk-utils.R
 f73f271153285cff50aca1aea7d273aa *R/zzz.R
-c638cf7db379f2038cc5f3e67160e06e *README.md
-2893db615024373c0831a5ef3b004e8c *build/partial.rdb
+093ff37c6db0142fe5c03fb399414937 *README.md
+3114e7ea418f17e2c77eb98af89e534c *build/partial.rdb
 cc6eebf14a3f516ec74168f3ea416fb2 *cleanup
 9401515addc6f00f403443fd0715fcf9 *configure
 d41d8cd98f00b204e9800998ecf8427e *configure.win
@@ -245,8 +245,9 @@ e1a47506a896f0144af3c34265fef2b1 *man/s2_lnglat.Rd
 43d061044e95b05b97b7cdb01d392708 *man/s2_options.Rd
 a86f2581e1af6031167a29956341993c *man/s2_point.Rd
 e2e7f612cb4705ee22e059404c24be46 *man/s2_unprojection_filter.Rd
-a1e554812f40e379f882459d6b204ba4 *src/Makevars.in
-1deee73d137214e1be0e17b862e7451d *src/Makevars.win
+eb03c05cfbbe187018422aaeac40cce1 *src/Makevars.in
+2cec33791efd347cbcb051402d7cf9c4 *src/Makevars.ucrt
+d3abdb2d8d7742514b57db199de5aab2 *src/Makevars.win
 acc40a222afbc6a6a6cfb633c62318ab *src/RcppExports.cpp
 5f46d29bc94bcdfc28e2a4df442310de *src/cpp-compat.cpp
 2d84b8be2c1d5dd660edc6e0e90617df *src/geography-collection.h
@@ -267,7 +268,7 @@ f5c6f18bef0fa2647fb6870d5c72177b *src/s2-constructors-formatters.cpp
 093210195ecdda6a7435575128bc5e85 *src/s2-options.h
 26da724d2fb9ccb3b7579e9a7f49001e *src/s2-point.cpp
 980e286c3b8ad05def8cb5729e83a98f *src/s2-predicates.cpp
-eb3d162e5970a845ed228c6a514a8d18 *src/s2-transformers.cpp
+22dc6e98f2e9d0afc941164bac1ef411 *src/s2-transformers.cpp
 2a3ac9aacf9ff1513a19f70b91902c83 *src/s2-xptr.cpp
 5870223619be64e10cd385cd100ba1e0 *src/s2/base/stringprintf.cc
 c10c3c7ca58239c0915bacffc70e37e1 *src/s2/base/strtoint.cc
@@ -398,10 +399,10 @@ adfd5e8008ceeea58ba3ee5e71ca040b *tests/testthat/test-s2-lnglat.R
 589616aabb1c291a3984f521274815bf *tests/testthat/test-s2-options.R
 9be8d6955daa3c211af562f4f41c639a *tests/testthat/test-s2-point.R
 0688d88be5a5f999507d227ee30c99dc *tests/testthat/test-s2-predicates.R
-85b2d04ec3fd0aa8c7ebed94651e0bdb *tests/testthat/test-s2-transformers.R
+b560db419b2b933fa6f9ed51859266c7 *tests/testthat/test-s2-transformers.R
 e0de43269c8f8eb622ef3aa6c6d6f01a *tests/testthat/test-s2-xptr.R
 a7de1183f03382626ca2b46bf1c4e781 *tests/testthat/test-utils.R
 940f3bf944538a6dbfc2d786d12f2d67 *tests/testthat/test-vctrs.R
 2203aa8a7e91a47ba75217c156e3b352 *tests/testthat/test-wk-utils.R
 0ec27c181a66ce5b72bc8c3940e9e00e *tools/version.c
-c649ea1343c76b81870be0fa55f6feb3 *tools/winlibs.R
+1f90833745efcd8c2e13769eef3fb57a *tools/winlibs.R
