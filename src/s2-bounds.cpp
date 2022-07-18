@@ -4,10 +4,6 @@
 
 #include "s2-options.h"
 #include "geography-operator.h"
-#include "point-geography.h"
-#include "polyline-geography.h"
-#include "polygon-geography.h"
-#include "geography-collection.h"
 
 #include <Rcpp.h>
 using namespace Rcpp;
@@ -23,8 +19,8 @@ DataFrame cpp_s2_bounds_cap(List geog) {
     if (item == R_NilValue) {
       lat[i] = lng[i] = angle[i] = NA_REAL;
     } else {
-      Rcpp::XPtr<Geography> feature(item);
-      S2Cap cap = feature->GetCapBound();
+      Rcpp::XPtr<RGeography> feature(item);
+      S2Cap cap = feature->Geog().Region()->GetCapBound();
       S2LatLng center(cap.center());
       lng[i] = center.lng().degrees();
       lat[i] = center.lat().degrees();
@@ -50,8 +46,8 @@ DataFrame cpp_s2_bounds_rect(List geog) {
     if (item == R_NilValue) {
       lng_lo[i] = lat_lo[i] = lng_hi[i] = lat_hi[i] = NA_REAL;
     } else {
-      Rcpp::XPtr<Geography> feature(item);
-      S2LatLngRect rect = feature->GetRectBound();
+      Rcpp::XPtr<RGeography> feature(item);
+      S2LatLngRect rect = feature->Geog().Region()->GetRectBound();
       lng_lo[i] = rect.lng_lo().degrees();
       lat_lo[i] = rect.lat_lo().degrees();
       lng_hi[i] = rect.lng_hi().degrees();

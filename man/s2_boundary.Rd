@@ -13,10 +13,13 @@
 \alias{s2_simplify}
 \alias{s2_rebuild}
 \alias{s2_buffer_cells}
+\alias{s2_convex_hull}
 \alias{s2_centroid_agg}
 \alias{s2_coverage_union_agg}
 \alias{s2_rebuild_agg}
 \alias{s2_union_agg}
+\alias{s2_convex_hull_agg}
+\alias{s2_point_on_surface}
 \title{S2 Geography Transformations}
 \usage{
 s2_boundary(x)
@@ -49,6 +52,8 @@ s2_buffer_cells(
   radius = s2_earth_radius_meters()
 )
 
+s2_convex_hull(x)
+
 s2_centroid_agg(x, na.rm = FALSE)
 
 s2_coverage_union_agg(x, options = s2_options(), na.rm = FALSE)
@@ -56,6 +61,10 @@ s2_coverage_union_agg(x, options = s2_options(), na.rm = FALSE)
 s2_rebuild_agg(x, options = s2_options(), na.rm = FALSE)
 
 s2_union_agg(x, options = s2_options(), na.rm = FALSE)
+
+s2_convex_hull_agg(x, na.rm = FALSE)
+
+s2_point_on_surface(x, na.rm = FALSE)
 }
 \arguments{
 \item{x}{\link[=as_s2_geography]{geography vectors}. These inputs
@@ -121,6 +130,11 @@ s2_boundary("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))")
 s2_centroid("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))")
 s2_centroid("LINESTRING (0 0, 10 0)")
 
+# s2_point_on_surface guarantees a point on surface
+# Note: this is not the same as st_point_on_surface
+s2_centroid("POLYGON ((0 0, 10 0, 1 1, 0 10, 0 0))")
+s2_point_on_surface("POLYGON ((0 0, 10 0, 1 1, 0 10, 0 0))")
+
 # returns the unweighted centroid of the entire input
 s2_centroid_agg(c("POINT (0 0)", "POINT (10 0)"))
 
@@ -165,6 +179,14 @@ s2_union(
   s2_options(snap = s2_snap_level(30))
 )
 
+# s2_convex_hull_agg builds the convex hull of a list of geometries
+s2_convex_hull_agg(
+  c(
+    "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))",
+    "POLYGON ((5 5, 15 5, 15 15, 5 15, 5 5))"
+  )
+)
+
 # use s2_union_agg() to aggregate geographies in a vector
 s2_coverage_union_agg(
   c(
@@ -177,6 +199,7 @@ s2_coverage_union_agg(
 
 # snap to grid rounds coordinates to a specified grid size
 s2_snap_to_grid("POINT (0.333333333333 0.666666666666)", 1e-2)
+
 
 }
 \seealso{

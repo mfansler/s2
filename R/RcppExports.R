@@ -69,6 +69,50 @@ cpp_s2_bounds_rect <- function(geog) {
     .Call(`_s2_cpp_s2_bounds_rect`, geog)
 }
 
+cpp_s2_cell_union_normalize <- function(cellUnionVector) {
+    .Call(`_s2_cpp_s2_cell_union_normalize`, cellUnionVector)
+}
+
+cpp_s2_cell_union_is_na <- function(cellUnionVector) {
+    .Call(`_s2_cpp_s2_cell_union_is_na`, cellUnionVector)
+}
+
+cpp_s2_cell_union_contains <- function(cellUnionVector1, cellUnionVector2) {
+    .Call(`_s2_cpp_s2_cell_union_contains`, cellUnionVector1, cellUnionVector2)
+}
+
+cpp_s2_cell_union_contains_cell <- function(cellUnionVector, cellIdVector) {
+    .Call(`_s2_cpp_s2_cell_union_contains_cell`, cellUnionVector, cellIdVector)
+}
+
+cpp_s2_cell_union_intersects <- function(cellUnionVector1, cellUnionVector2) {
+    .Call(`_s2_cpp_s2_cell_union_intersects`, cellUnionVector1, cellUnionVector2)
+}
+
+cpp_s2_cell_union_intersection <- function(cellUnionVector1, cellUnionVector2) {
+    .Call(`_s2_cpp_s2_cell_union_intersection`, cellUnionVector1, cellUnionVector2)
+}
+
+cpp_s2_cell_union_union <- function(cellUnionVector1, cellUnionVector2) {
+    .Call(`_s2_cpp_s2_cell_union_union`, cellUnionVector1, cellUnionVector2)
+}
+
+cpp_s2_cell_union_difference <- function(cellUnionVector1, cellUnionVector2) {
+    .Call(`_s2_cpp_s2_cell_union_difference`, cellUnionVector1, cellUnionVector2)
+}
+
+cpp_s2_geography_from_cell_union <- function(cellUnionVector) {
+    .Call(`_s2_cpp_s2_geography_from_cell_union`, cellUnionVector)
+}
+
+cpp_s2_covering_cell_ids <- function(geog, min_level, max_level, max_cells, buffer, interior) {
+    .Call(`_s2_cpp_s2_covering_cell_ids`, geog, min_level, max_level, max_cells, buffer, interior)
+}
+
+cpp_s2_covering_cell_ids_agg <- function(geog, min_level, max_level, max_cells, buffer, interior, naRm) {
+    .Call(`_s2_cpp_s2_covering_cell_ids_agg`, geog, min_level, max_level, max_cells, buffer, interior, naRm)
+}
+
 cpp_s2_cell_sentinel <- function() {
     .Call(`_s2_cpp_s2_cell_sentinel`)
 }
@@ -83,6 +127,10 @@ cpp_s2_cell_from_lnglat <- function(lnglat) {
 
 cpp_s2_cell_to_lnglat <- function(cellId) {
     .Call(`_s2_cpp_s2_cell_to_lnglat`, cellId)
+}
+
+cpp_s2_cell_to_cell_union <- function(cellId) {
+    .Call(`_s2_cpp_s2_cell_to_cell_union`, cellId)
 }
 
 cpp_s2_cell_is_na <- function(cellIdVector) {
@@ -197,52 +245,28 @@ cpp_s2_cell_max_distance <- function(cellIdVector1, cellIdVector2) {
     .Call(`_s2_cpp_s2_cell_max_distance`, cellIdVector1, cellIdVector2)
 }
 
-cpp_s2_geog_point <- function(x, y) {
-    .Call(`_s2_cpp_s2_geog_point`, x, y)
+cpp_s2_cell_common_ancestor_level <- function(cellIdVector1, cellIdVector2) {
+    .Call(`_s2_cpp_s2_cell_common_ancestor_level`, cellIdVector1, cellIdVector2)
 }
 
-cpp_s2_make_line <- function(x, y, featureId) {
-    .Call(`_s2_cpp_s2_make_line`, x, y, featureId)
-}
-
-cpp_s2_make_polygon <- function(x, y, featureId, ringId, oriented, check) {
-    .Call(`_s2_cpp_s2_make_polygon`, x, y, featureId, ringId, oriented, check)
-}
-
-s2_geography_from_wkb <- function(wkb, oriented, check) {
-    .Call(`_s2_s2_geography_from_wkb`, wkb, oriented, check)
-}
-
-s2_geography_from_wkt <- function(wkt, oriented, check) {
-    .Call(`_s2_s2_geography_from_wkt`, wkt, oriented, check)
+cpp_s2_cell_common_ancestor_level_agg <- function(cellId) {
+    .Call(`_s2_cpp_s2_cell_common_ancestor_level_agg`, cellId)
 }
 
 s2_geography_full <- function(x) {
     .Call(`_s2_s2_geography_full`, x)
 }
 
-s2_geography_to_wkt <- function(s2_geography, precision, trim) {
-    .Call(`_s2_s2_geography_to_wkt`, s2_geography, precision, trim)
-}
-
-s2_geography_to_wkb <- function(s2_geography, endian) {
-    .Call(`_s2_s2_geography_to_wkb`, s2_geography, endian)
-}
-
-s2_geography_format <- function(s2_geography, maxCoords, precision, trim) {
-    .Call(`_s2_s2_geography_format`, s2_geography, maxCoords, precision, trim)
-}
-
-s2_lnglat_from_numeric <- function(lng, lat) {
-    .Call(`_s2_s2_lnglat_from_numeric`, lng, lat)
+cpp_s2_geography_is_na <- function(geog) {
+    .Call(`_s2_cpp_s2_geography_is_na`, geog)
 }
 
 s2_lnglat_from_s2_point <- function(s2_point) {
     .Call(`_s2_s2_lnglat_from_s2_point`, s2_point)
 }
 
-data_frame_from_s2_lnglat <- function(xptr) {
-    .Call(`_s2_data_frame_from_s2_lnglat`, xptr)
+s2_point_from_s2_lnglat <- function(s2_lnglat) {
+    .Call(`_s2_s2_point_from_s2_lnglat`, s2_lnglat)
 }
 
 cpp_s2_closest_feature <- function(geog1, geog2) {
@@ -253,8 +277,8 @@ cpp_s2_farthest_feature <- function(geog1, geog2) {
     .Call(`_s2_cpp_s2_farthest_feature`, geog1, geog2)
 }
 
-cpp_s2_closest_edges <- function(geog1, geog2, n, min_distance) {
-    .Call(`_s2_cpp_s2_closest_edges`, geog1, geog2, n, min_distance)
+cpp_s2_closest_edges <- function(geog1, geog2, n, min_distance, max_distance) {
+    .Call(`_s2_cpp_s2_closest_edges`, geog1, geog2, n, min_distance, max_distance)
 }
 
 cpp_s2_may_intersect_matrix <- function(geog1, geog2, maxEdgesPerCell, maxFeatureCells, s2options) {
@@ -313,16 +337,8 @@ cpp_s2_equals_matrix_brute_force <- function(geog1, geog2, s2options) {
     .Call(`_s2_cpp_s2_equals_matrix_brute_force`, geog1, geog2, s2options)
 }
 
-s2_point_from_numeric <- function(x, y, z) {
-    .Call(`_s2_s2_point_from_numeric`, x, y, z)
-}
-
-s2_point_from_s2_lnglat <- function(s2_lnglat) {
-    .Call(`_s2_s2_point_from_s2_lnglat`, s2_lnglat)
-}
-
-data_frame_from_s2_point <- function(s2_point) {
-    .Call(`_s2_data_frame_from_s2_point`, s2_point)
+cpp_s2_dwithin_matrix_brute_force <- function(geog1, geog2, distance) {
+    .Call(`_s2_cpp_s2_dwithin_matrix_brute_force`, geog1, geog2, distance)
 }
 
 cpp_s2_intersects <- function(geog1, geog2, s2options) {
@@ -343,6 +359,10 @@ cpp_s2_touches <- function(geog1, geog2, s2options) {
 
 cpp_s2_dwithin <- function(geog1, geog2, distance) {
     .Call(`_s2_cpp_s2_dwithin`, geog1, geog2, distance)
+}
+
+cpp_s2_prepared_dwithin <- function(geog1, geog2, distance) {
+    .Call(`_s2_cpp_s2_prepared_dwithin`, geog1, geog2, distance)
 }
 
 cpp_s2_intersects_box <- function(geog, lng1, lat1, lng2, lat2, detail, s2options) {
@@ -393,6 +413,10 @@ cpp_s2_centroid <- function(geog) {
     .Call(`_s2_cpp_s2_centroid`, geog)
 }
 
+cpp_s2_point_on_surface <- function(geog) {
+    .Call(`_s2_cpp_s2_point_on_surface`, geog)
+}
+
 cpp_s2_boundary <- function(geog) {
     .Call(`_s2_cpp_s2_boundary`, geog)
 }
@@ -413,11 +437,11 @@ cpp_s2_buffer_cells <- function(geog, distance, maxCells, minLevel) {
     .Call(`_s2_cpp_s2_buffer_cells`, geog, distance, maxCells, minLevel)
 }
 
-s2_xptr_test <- function(size) {
-    .Call(`_s2_s2_xptr_test`, size)
+cpp_s2_convex_hull <- function(geog) {
+    .Call(`_s2_cpp_s2_convex_hull`, geog)
 }
 
-s2_xptr_test_op <- function(s2_xptr_test) {
-    invisible(.Call(`_s2_s2_xptr_test_op`, s2_xptr_test))
+cpp_s2_convex_hull_agg <- function(geog, naRm) {
+    .Call(`_s2_cpp_s2_convex_hull_agg`, geog, naRm)
 }
 

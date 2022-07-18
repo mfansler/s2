@@ -8,6 +8,7 @@
 \alias{s2_geog_from_wkb}
 \alias{s2_as_text}
 \alias{s2_as_binary}
+\alias{s2_tessellate_tol_default}
 \title{Create and Format Geography Vectors}
 \usage{
 s2_geog_point(longitude, latitude)
@@ -23,13 +24,38 @@ s2_make_polygon(
   check = TRUE
 )
 
-s2_geog_from_text(wkt_string, oriented = FALSE, check = TRUE)
+s2_geog_from_text(
+  wkt_string,
+  oriented = FALSE,
+  check = TRUE,
+  planar = FALSE,
+  tessellate_tol_m = s2_tessellate_tol_default()
+)
 
-s2_geog_from_wkb(wkb_bytes, oriented = FALSE, check = TRUE)
+s2_geog_from_wkb(
+  wkb_bytes,
+  oriented = FALSE,
+  check = TRUE,
+  planar = FALSE,
+  tessellate_tol_m = s2_tessellate_tol_default()
+)
 
-s2_as_text(x, precision = 16, trim = TRUE)
+s2_as_text(
+  x,
+  precision = 16,
+  trim = TRUE,
+  planar = FALSE,
+  tessellate_tol_m = s2_tessellate_tol_default()
+)
 
-s2_as_binary(x, endian = wk::wk_platform_endian())
+s2_as_binary(
+  x,
+  endian = wk::wk_platform_endian(),
+  planar = FALSE,
+  tessellate_tol_m = s2_tessellate_tol_default()
+)
+
+s2_tessellate_tol_default()
 }
 \arguments{
 \item{longitude, latitude}{Vectors of latitude and longitude}
@@ -45,6 +71,11 @@ rings are defined clockwise).}
 \item{check}{Use \code{check = FALSE} to skip error on invalid geometries}
 
 \item{wkt_string}{Well-known text}
+
+\item{planar}{Use \code{TRUE} to force planar edges in import or export.}
+
+\item{tessellate_tol_m}{The maximum number of meters to that a point must
+be moved to satisfy the planar edge constraint.}
 
 \item{wkb_bytes}{A \code{list()} of \code{raw()}}
 
@@ -99,6 +130,24 @@ s2_as_text(geog)
 # import and export well-known binary
 (geog <- s2_geog_from_wkb(wk::as_wkb("POINT (-64 45)")))
 s2_as_binary(geog)
+
+# import geometry from planar space
+s2_geog_from_text(
+   "POLYGON ((0 0, 1 0, 0 1, 0 0))",
+   planar = TRUE,
+   tessellate_tol_m = 1
+)
+
+# export geographies into planar space
+geog <- s2_make_polygon(c(179, -179, 179), c(10, 10, 11))
+s2_as_text(geog, planar = TRUE)
+
+# polygons containing a pole need an extra step
+geog <- s2_data_countries("Antarctica")
+geom <- s2_as_text(
+  s2_intersection(geog, s2_world_plate_carree()),
+  planar = TRUE
+)
 
 }
 \seealso{

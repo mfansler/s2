@@ -5,6 +5,7 @@
 #include "s2/s2polygon.h"
 #include "s2/s2testing.h"
 #include "s2/s2builderutil_snap_functions.h"
+#include "s2/s2shape_index_buffered_region.h"
 
 #include "geography-operator.h"
 #include "s2-options.h"
@@ -27,12 +28,8 @@ LogicalVector cpp_s2_intersects(List geog1, List geog2, List s2options) {
   class Op: public BinaryPredicateOperator {
   public:
     Op(List s2options): BinaryPredicateOperator(s2options) {}
-    int processFeature(XPtr<Geography> feature1, XPtr<Geography> feature2, R_xlen_t i) {
-      return S2BooleanOperation::Intersects(
-        *feature1->ShapeIndex(),
-        *feature2->ShapeIndex(),
-        options
-      );
+    int processFeature(XPtr<RGeography> feature1, XPtr<RGeography> feature2, R_xlen_t i) {
+      return s2geography::s2_intersects(feature1->Index(), feature2->Index(), options);
     };
   };
 
@@ -46,12 +43,8 @@ LogicalVector cpp_s2_equals(List geog1, List geog2, List s2options) {
   class Op: public BinaryPredicateOperator {
   public:
     Op(List s2options): BinaryPredicateOperator(s2options) {}
-    int processFeature(XPtr<Geography> feature1, XPtr<Geography> feature2, R_xlen_t i) {
-      return S2BooleanOperation::Equals(
-        *feature1->ShapeIndex(),
-        *feature2->ShapeIndex(),
-        this->options
-      );
+    int processFeature(XPtr<RGeography> feature1, XPtr<RGeography> feature2, R_xlen_t i) {
+      return s2geography::s2_equals(feature1->Index(), feature2->Index(), options);
     }
   };
 
@@ -64,18 +57,8 @@ LogicalVector cpp_s2_contains(List geog1, List geog2, List s2options) {
   class Op: public BinaryPredicateOperator {
   public:
     Op(List s2options): BinaryPredicateOperator(s2options) {}
-    int processFeature(XPtr<Geography> feature1, XPtr<Geography> feature2, R_xlen_t i) {
-      // by default Contains() will return true for Contains(x, EMPTY), which is
-      // not true in BigQuery or GEOS
-      if (feature2->IsEmpty()) {
-        return false;
-      } else {
-        return S2BooleanOperation::Contains(
-          *feature1->ShapeIndex(),
-          *feature2->ShapeIndex(),
-          this->options
-        );
-      }
+    int processFeature(XPtr<RGeography> feature1, XPtr<RGeography> feature2, R_xlen_t i) {
+      return s2geography::s2_contains(feature1->Index(), feature2->Index(), options);
     }
   };
 
@@ -97,17 +80,9 @@ LogicalVector cpp_s2_touches(List geog1, List geog2, List s2options) {
       this->openOptions.set_polyline_model(S2BooleanOperation::PolylineModel::OPEN);
     }
 
-    int processFeature(XPtr<Geography> feature1, XPtr<Geography> feature2, R_xlen_t i) {
-      return S2BooleanOperation::Intersects(
-        *feature1->ShapeIndex(),
-        *feature2->ShapeIndex(),
-        this->closedOptions
-      ) &&
-        !S2BooleanOperation::Intersects(
-          *feature1->ShapeIndex(),
-          *feature2->ShapeIndex(),
-          this->openOptions
-        );
+    int processFeature(XPtr<RGeography> feature1, XPtr<RGeography> feature2, R_xlen_t i) {
+      return s2geography::s2_intersects(feature1->Index(), feature2->Index(), this->closedOptions) &&
+        !s2geography::s2_intersects(feature1->Index(), feature2->Index(), this->openOptions);
     }
 
   private:
@@ -128,12 +103,71 @@ LogicalVector cpp_s2_dwithin(List geog1, List geog2, NumericVector distance) {
   class Op: public BinaryGeographyOperator<LogicalVector, int> {
   public:
     NumericVector distance;
-    Op(NumericVector distance): distance(distance) {}
+    RGeography* geog2_id;
+    std::unique_ptr<S2ClosestEdgeQuery> query;
 
-    int processFeature(XPtr<Geography> feature1, XPtr<Geography> feature2, R_xlen_t i) {
-      S2ClosestEdgeQuery query(feature1->ShapeIndex());
-      S2ClosestEdgeQuery::ShapeIndexTarget target(feature2->ShapeIndex());
-      return query.IsDistanceLessOrEqual(&target, S1ChordAngle::Radians(this->distance[i]));
+    Op(NumericVector distance): distance(distance), geog2_id(nullptr) {}
+
+    int processFeature(XPtr<RGeography> feature1, XPtr<RGeography> feature2, R_xlen_t i) {
+      if (feature2.get() != geog2_id) {
+        this->query = absl::make_unique<S2ClosestEdgeQuery>(&feature2->Index().ShapeIndex());
+        this->geog2_id = feature2.get();
+      }
+
+      S2ClosestEdgeQuery::ShapeIndexTarget target(&feature1->Index().ShapeIndex());
+      return query->IsDistanceLessOrEqual(&target, S1ChordAngle::Radians(this->distance[i]));
+    }
+  };
+
+  Op op(distance);
+  return op.processVector(geog1, geog2);
+}
+
+// [[Rcpp::export]]
+LogicalVector cpp_s2_prepared_dwithin(List geog1, List geog2, NumericVector distance) {
+  if (distance.size() != geog1.size())  {
+    stop("Incompatible lengths"); // #nocov
+  }
+
+  class Op: public BinaryGeographyOperator<LogicalVector, int> {
+  public:
+    NumericVector distance;
+    S2RegionCoverer coverer;
+    std::vector<S2CellId> covering;
+    RGeography* covering_id;
+    std::unique_ptr<S2ClosestEdgeQuery> query;
+    MutableS2ShapeIndex::Iterator iterator;
+
+    Op(NumericVector distance):
+      distance(distance), covering_id(nullptr) {}
+
+    int processFeature(XPtr<RGeography> feature1, XPtr<RGeography> feature2, R_xlen_t i) {
+      S1ChordAngle distance_angle = S1ChordAngle::Radians(this->distance[i]);
+
+      // Update the query and covering on y if needed
+      if (feature2.get() != covering_id) {
+        S2ShapeIndexBufferedRegion buffered(&feature2->Index().ShapeIndex(), distance_angle);
+        coverer.GetCovering(buffered, &covering);
+        this->query = absl::make_unique<S2ClosestEdgeQuery>(&feature2->Index().ShapeIndex());
+        this->covering_id = feature2.get();
+      }
+
+      // Check for a possible intersection
+      iterator.Init(&feature1->Index().ShapeIndex());
+      bool may_intersect_buffer = false;
+      for (const S2CellId& query_cell: covering) {
+          if (iterator.Locate(query_cell) != S2ShapeIndex::CellRelation::DISJOINT) {
+            may_intersect_buffer = true;
+            break;
+          }
+      }
+
+      if (may_intersect_buffer) {
+        S2ClosestEdgeQuery::ShapeIndexTarget target(&feature1->Index().ShapeIndex());
+        return query->IsDistanceLessOrEqual(&target, distance_angle);
+      } else {
+        return false;
+      }
     }
   };
 
@@ -163,7 +197,7 @@ LogicalVector cpp_s2_intersects_box(List geog,
       this->options = options.booleanOperationOptions();
     }
 
-    int processFeature(XPtr<Geography> feature, R_xlen_t i) {
+    int processFeature(XPtr<RGeography> feature, R_xlen_t i) {
       // construct polygon
       // this might be easier with an s2region intersection
       double xmin = this->lng1[i];
@@ -190,39 +224,9 @@ LogicalVector cpp_s2_intersects_box(List geog,
         return false;
       }
 
-      // create polygon vertices
-      std::vector<S2Point> points(2 + 2 * detail);
-      S2LatLng vertex;
+      S2LatLngRect rect(S2LatLng::FromDegrees(ymin, xmin), S2LatLng::FromDegrees(ymax, xmax));
 
-      // south edge
-      for (int i = 0; i <= detail; i++) {
-        vertex = S2LatLng::FromDegrees(xmin + deltaDegrees * i, ymin).Normalized();
-        points[i] = vertex.ToPoint();
-      }
-
-      // north edge
-      for (int i = 0; i <= detail; i++) {
-        vertex = S2LatLng::FromDegrees(xmax - deltaDegrees * i, ymax).Normalized();
-        points[detail + 1 + i] = vertex.ToPoint();
-      }
-
-      // create polygon
-      std::unique_ptr<S2Loop> loop(new S2Loop());
-      loop->set_s2debug_override(S2Debug::DISABLE);
-      loop->Init(points);
-      loop->Normalize();
-
-      std::vector<std::unique_ptr<S2Loop>> loops(1);
-      loops[0] = std::move(loop);
-      S2Polygon polygon;
-      polygon.InitOriented(std::move(loops));
-
-      // test intersection
-      return S2BooleanOperation::Intersects(
-        polygon.index(),
-        *feature->ShapeIndex(),
-        this->options
-      );
+      return s2geography::s2_intersects_box(feature->Index(), rect, options, deltaDegrees);
     }
   };
 

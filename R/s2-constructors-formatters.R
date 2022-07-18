@@ -16,6 +16,9 @@
 #' @param longitude,latitude Vectors of latitude and longitude
 #' @param wkt_string Well-known text
 #' @param wkb_bytes A `list()` of `raw()`
+#' @param planar Use `TRUE` to force planar edges in import or export.
+#' @param tessellate_tol_m The maximum number of meters to that a point must
+#'   be moved to satisfy the planar edge constraint.
 #' @param feature_id,ring_id Vectors for which a change in
 #'   sequential values indicates a new feature or ring. Use [factor()]
 #'   to convert from a character vector.
@@ -69,71 +72,139 @@
 #' (geog <- s2_geog_from_wkb(wk::as_wkb("POINT (-64 45)")))
 #' s2_as_binary(geog)
 #'
+#' # import geometry from planar space
+#' s2_geog_from_text(
+#'    "POLYGON ((0 0, 1 0, 0 1, 0 0))",
+#'    planar = TRUE,
+#'    tessellate_tol_m = 1
+#' )
+#'
+#' # export geographies into planar space
+#' geog <- s2_make_polygon(c(179, -179, 179), c(10, 10, 11))
+#' s2_as_text(geog, planar = TRUE)
+#'
+#' # polygons containing a pole need an extra step
+#' geog <- s2_data_countries("Antarctica")
+#' geom <- s2_as_text(
+#'   s2_intersection(geog, s2_world_plate_carree()),
+#'   planar = TRUE
+#' )
+#'
 s2_geog_point <- function(longitude, latitude) {
-  recycled <- recycle_common(longitude, latitude)
-  new_s2_xptr(cpp_s2_geog_point(recycled[[1]], recycled[[2]]), "s2_geography")
+  wk::wk_handle(wk::xy(longitude, latitude), s2_geography_writer())
 }
 
 #' @rdname s2_geog_point
 #' @export
 s2_make_line <- function(longitude, latitude, feature_id = 1L) {
-  recycled <- recycle_common(longitude, latitude, feature_id)
-  new_s2_xptr(cpp_s2_make_line(recycled[[1]], recycled[[2]], featureId = recycled[[3]]), "s2_geography")
+  wk::wk_handle(
+    wk::xy(longitude, latitude),
+    wk::wk_linestring_filter(
+      s2_geography_writer(),
+      feature_id = as.integer(feature_id)
+    )
+  )
 }
 
 #' @rdname s2_geog_point
 #' @export
 s2_make_polygon <- function(longitude, latitude, feature_id = 1L, ring_id = 1L,
                             oriented = FALSE, check = TRUE) {
-  recycled <- recycle_common(longitude, latitude, feature_id, ring_id)
-  new_s2_xptr(
-    cpp_s2_make_polygon(
-      recycled[[1]], recycled[[2]],
-      featureId = recycled[[3]],
-      ringId = recycled[[4]],
-      oriented = oriented,
-      check = check
-    ),
-    "s2_geography"
+  wk::wk_handle(
+    wk::xy(longitude, latitude),
+    wk::wk_polygon_filter(
+      s2_geography_writer(oriented = oriented, check = check),
+      feature_id = as.integer(feature_id),
+      ring_id = as.integer(ring_id)
+    )
   )
 }
 
 #' @rdname s2_geog_point
 #' @export
-s2_geog_from_text <- function(wkt_string, oriented = FALSE, check = TRUE) {
-  wk::validate_wk_wkt(wkt_string)
-  new_s2_xptr(
-    s2_geography_from_wkt(
-      wkt_string,
+s2_geog_from_text <- function(wkt_string, oriented = FALSE, check = TRUE,
+                              planar = FALSE,
+                              tessellate_tol_m = s2_tessellate_tol_default()) {
+  attributes(wkt_string) <- NULL
+  wkt <- wk::new_wk_wkt(wkt_string, geodesic = TRUE)
+  wk::validate_wk_wkt(wkt)
+
+  wk::wk_handle(
+    wkt,
+    s2_geography_writer(
       oriented = oriented,
-      check = check
-    ),
-    "s2_geography"
+      check = check,
+      tessellate_tol = if (planar) {
+        tessellate_tol_m / s2_earth_radius_meters()
+      } else {
+        Inf
+      }
+    )
   )
 }
 
 #' @rdname s2_geog_point
 #' @export
-s2_geog_from_wkb <- function(wkb_bytes, oriented = FALSE, check = TRUE) {
-  wk::validate_wk_wkb(wkb_bytes)
-  new_s2_xptr(
-    s2_geography_from_wkb(
-      wkb_bytes,
+s2_geog_from_wkb <- function(wkb_bytes, oriented = FALSE, check = TRUE,
+                             planar = FALSE,
+                             tessellate_tol_m = s2_tessellate_tol_default()) {
+  attributes(wkb_bytes) <- NULL
+  wkb <- wk::new_wk_wkb(wkb_bytes)
+  wk::validate_wk_wkb(wkb)
+  wk::wk_handle(
+    wkb,
+    s2_geography_writer(
       oriented = oriented,
-      check = check
-    ),
-    "s2_geography"
+      check = check,
+      tessellate_tol = if (planar) {
+        tessellate_tol_m / s2_earth_radius_meters()
+      } else {
+        Inf
+      }
+    )
   )
 }
 
 #' @rdname s2_geog_point
 #' @export
-s2_as_text <- function(x, precision = 16, trim = TRUE) {
-  s2_geography_to_wkt(as_s2_geography(x), precision = precision, trim = trim)
+s2_as_text <- function(x, precision = 16, trim = TRUE,
+                       planar = FALSE,
+                       tessellate_tol_m = s2_tessellate_tol_default()) {
+  wkt <- wk::wk_handle(
+    as_s2_geography(x),
+    wk::wkt_writer(precision = precision, trim = trim),
+    s2_tessellate_tol = if (planar) {
+      tessellate_tol_m / s2_earth_radius_meters()
+    } else {
+      Inf
+    }
+  )
+
+  attributes(wkt) <- NULL
+  wkt
 }
 
 #' @rdname s2_geog_point
 #' @export
-s2_as_binary <- function(x, endian = wk::wk_platform_endian()) {
-  structure(s2_geography_to_wkb(as_s2_geography(x), endian = endian), class = "blob")
+s2_as_binary <- function(x, endian = wk::wk_platform_endian(),
+                         planar = FALSE,
+                         tessellate_tol_m = s2_tessellate_tol_default()) {
+  structure(
+    wk::wk_handle(
+      as_s2_geography(x),
+      wk::wkb_writer(endian = endian),
+      s2_tessellate_tol = if (planar) {
+        tessellate_tol_m / s2_earth_radius_meters()
+      } else {
+        Inf
+      }
+    ),
+    class = "blob"
+  )
+}
+
+#' @rdname s2_geog_point
+#' @export
+s2_tessellate_tol_default <- function() {
+  100
 }

@@ -32,6 +32,20 @@ test_that("s2_centroid() and s2_centroid_agg() normalize points", {
   )
 })
 
+test_that("s2_point_on_surface() works", {
+  expect_wkt_equal(s2_point_on_surface("POINT (30 10)"), "POINT (30 10)")
+  expect_true(s2_is_empty(s2_point_on_surface("POINT EMPTY")))
+  expect_wkt_equal(
+    s2_point_on_surface("POLYGON ((0 0, 10 0, 1 1, 0 10, 0 0))"),
+    "POINT (0.4502368024893488 0.4502229020796313)",
+    precision = 15
+  )
+  expect_wkt_equal(
+      s2_point_on_surface("MULTIPOINT ((0 0), (0 5), (0 10))"),
+      "POINT (0 5)"
+  )
+})
+
 test_that("s2_boundary() works", {
   expect_true(s2_is_empty(s2_boundary("POINT (30 10)")))
   expect_true(s2_is_empty(s2_boundary("POINT EMPTY")))
@@ -248,7 +262,7 @@ test_that("s2_union(x) works with polygons that have overlapping input regions",
   txt <- "MULTIPOLYGON (((0 0, 0 1, 1 1, 1 0, 0 0)), ((0.1 0.9, 0.1 1.9, 1.1 1.9, 1.1 0.9, 0.1 0.9)))"
   # geos::geos_unary_union(txt) %>% as_wkb() %>% s2_area(radius = 1)
   unioned <- s2_union(as_s2_geography(txt, check = F))
-  expect_equal(s2_area(unioned, radius = 1), 0.0005817275)
+  expect_equal(round(s2_area(unioned, radius = 1), 12), 0.00058172748)
 
   # two outer loops, one valid inner loop
   # geos::geos_unary_union(txt2) %>% as_wkb() %>% s2_area(radius = 1)
@@ -257,7 +271,7 @@ test_that("s2_union(x) works with polygons that have overlapping input regions",
     ((0.1 0.9, 0.1 1.9, 1.1 1.9, 1.1 0.9, 0.1 0.9))
   )"
   unioned <- s2_union(as_s2_geography(txt2, check = F))
-  expect_equal(s2_area(unioned, radius = 1), 0.0005329892)
+  expect_equal(round(s2_area(unioned, radius = 1), 12), 0.000532989259)
 })
 
 test_that("s2_union(x) errors for the case of mixed dimension collections", {
@@ -265,7 +279,7 @@ test_that("s2_union(x) errors for the case of mixed dimension collections", {
     s2_union(
       c("GEOMETRYCOLLECTION(POLYGON ((-10 -10, -10 10, 10 10, 10 -10, -10 -10)), LINESTRING (0 -20, 0 20))")
     ),
-    "Unary union for collections is not implemented"
+    "for multidimensional collections not implemented"
   )
 })
 
@@ -374,17 +388,36 @@ test_that("s2_union_agg() works", {
 
   # NULL handling
   expect_identical(
-    s2_coverage_union_agg(c("POINT (30 10)", NA), na.rm = FALSE),
+    s2_union_agg(c("POINT (30 10)", NA), na.rm = FALSE),
     as_s2_geography(NA_character_)
   )
   expect_wkt_equal(
-    s2_coverage_union_agg(character()),
+    s2_union_agg(character()),
     as_s2_geography("GEOMETRYCOLLECTION EMPTY")
   )
   expect_wkt_equal(
-    s2_coverage_union_agg(c("POINT (30 10)", NA), na.rm = TRUE),
+    s2_union_agg(c("POINT (30 10)", NA), na.rm = TRUE),
     "POINT (30 10)"
   )
+
+  # make sure this works on polygons since they are handled differently than
+  # points and linestrings
+  expect_equal(
+    s2_area(s2_union_agg(s2_data_countries())),
+    sum(s2_area(s2_union_agg(s2_data_countries())))
+  )
+
+  # check non-polygons and polygons together
+  points_and_poly <- s2_union_agg(
+    c(
+      s2_data_countries(),
+      s2_data_cities()
+    )
+  )
+
+  points <- s2_rebuild(points_and_poly, options = s2_options(dimensions = "point"))
+  poly <- s2_rebuild(points_and_poly, options = s2_options(dimensions = "polygon"))
+  expect_false(any(s2_intersects(points, poly)))
 })
 
 test_that("s2_rebuild_agg() works", {
@@ -576,19 +609,19 @@ test_that("real data survives the S2BooleanOperation", {
 
   for (continent in unique(s2::s2_data_tbl_countries$continent)) {
     # this is primarily a test of the S2BooleanOperation -> Geography constructor
-    unioned <- expect_is(s2_coverage_union_agg(s2_data_countries(continent)), "s2_geography")
+    unioned <- expect_s3_class(s2_coverage_union_agg(s2_data_countries(continent)), "s2_geography")
 
-    # this is a test of Geography::Export() on potentially complex polygons
+    # this is a test of RGeography::Export() on potentially complex polygons
     exported <- expect_length(s2_as_binary(unioned), 1)
 
     # the output WKB should load as a polygon with oriented = TRUE and result in the
     # same number of points and similar area
-    reloaded <- as_s2_geography(structure(exported, class = "wk_wkb"), oriented = TRUE)
+    reloaded <- s2_geog_from_wkb(exported, oriented = TRUE)
     expect_equal(s2_num_points(reloaded), s2_num_points(unioned))
     expect_equal(s2_area(reloaded, radius = 1), s2_area(unioned, radius = 1))
 
     # also check with oriented = FALSE (may catch quirky nesting)
-    reloaded <- as_s2_geography(structure(exported, class = "wk_wkb"), oriented = FALSE)
+    reloaded <- s2_geog_from_wkb(exported, oriented = FALSE)
     expect_equal(s2_num_points(reloaded), s2_num_points(unioned))
     expect_equal(s2_area(reloaded, radius = 1), s2_area(unioned, radius = 1))
   }
@@ -618,5 +651,64 @@ test_that("s2_interpolate() and s2_interpolate_normalized() work", {
   expect_error(
     s2_interpolate_normalized("MULTILINESTRING ((0 1, 1 1), (1 1, 1 2))", 1),
     "must be a simple geography"
+  )
+})
+
+test_that("s2_convex_hull() works", {
+  expect_equal(
+    s2_area(s2_convex_hull(
+      c("GEOMETRYCOLLECTION(POINT(3.6 43.2), POINT (0 0), POINT(3.61 43.21))", NA)
+    )),
+    s2_area(c("POLYGON ((0 0, 3.61 43.21, 3.6 43.2, 0 0))", NA))
+  )
+})
+
+
+test_that("s2_convex_hull_agg() works", {
+  expect_equal(
+    s2_area(s2_convex_hull_agg(c("POINT(3.6 43.2)", "POINT (0 0)", "POINT(3.61 43.21)"))),
+    s2_area("POLYGON ((0 0, 3.61 43.21, 3.6 43.2, 0 0))")
+  )
+
+  expect_equal(
+    s2_area(s2_convex_hull_agg(c(
+    "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))",
+    "POLYGON ((5 5, 15 5, 15 15, 5 15, 5 5))"))),
+    s2_area("POLYGON ((0 0, 10 0, 15 5, 15 15, 5 15, 0 10, 0 0))")
+  )
+
+  expect_equal(
+    s2_area(s2_convex_hull_agg(c(
+     "POINT (3.6 43.2)",
+     "LINESTRING (3.49 43.05, 3.52 43.1, 3.38 43.2, 3.1 43.1)",
+     "POLYGON ((3.01 43.2, 3.4 44.01, 3.5 43.5, 3.1 43.2, 3.01 43.2))",
+     "GEOMETRYCOLLECTION EMPTY"
+    ))),
+    s2_area(
+      "POLYGON ((3.49 43.05, 3.6 43.2, 3.4 44.01, 3.01 43.2, 3.1 43.1, 3.49 43.05))"
+    )
+  )
+
+  expect_equal(
+    s2_area(s2_convex_hull_agg(
+      "GEOMETRYCOLLECTION(POLYGON ((3.01 43.2, 3.4 44.01, 3.5 43.5, 3.1 43.2, 3.01 43.2)),
+       POINT (3.6 43.2))"
+    )),
+    s2_area(s2_convex_hull_agg(
+      c(
+        "POLYGON ((3.01 43.2, 3.4 44.01, 3.5 43.5, 3.1 43.2, 3.01 43.2))",
+        "POINT (3.6 43.2)"
+      )
+    ))
+  )
+
+  expect_identical(
+    s2_convex_hull_agg(c("POINT (0 0)", NA), na.rm = FALSE),
+    as_s2_geography(NA_character_)
+  )
+
+  expect_equal(
+    s2_area(s2_convex_hull_agg(c("POINT (0 0)", NA), na.rm = TRUE)),
+    0
   )
 })

@@ -61,14 +61,14 @@ bool IsDistanceLess(const S2Point& x, const S2Point& a, const S2Point& b,
 // because (1) using S1ChordAngle is much faster than S1Angle, and (2) it
 // can save a lot of work by not actually computing the distance when it is
 // obviously larger than the current minimum.
-bool UpdateMinDistance(const S2Point& x, const S2Point& a, const S2Point& b,
-                       S1ChordAngle* min_dist);
+int UpdateMinDistance(const S2Point& x, const S2Point& a, const S2Point& b,
+                      S1ChordAngle* min_dist);
 
 // If the maximum distance from X to the edge AB is greater than "max_dist",
 // this method updates "max_dist" and returns true.  Otherwise it returns false.
 // The case A == B is handled correctly.
-bool UpdateMaxDistance(const S2Point& x, const S2Point& a, const S2Point& b,
-                       S1ChordAngle* max_dist);
+int UpdateMaxDistance(const S2Point& x, const S2Point& a, const S2Point& b,
+                      S1ChordAngle* max_dist);
 
 // Returns the maximum error in the result of UpdateMinDistance (and
 // associated functions such as UpdateMinInteriorDistance, IsDistanceLess,
@@ -147,15 +147,15 @@ S2Point InterpolateAtDistance(S1Angle ax, const S2Point& a, const S2Point& b);
 // Like UpdateMinDistance(), but computes the minimum distance between the
 // given pair of edges.  (If the two edges cross, the distance is zero.)
 // The cases a0 == a1 and b0 == b1 are handled correctly.
-bool UpdateEdgePairMinDistance(const S2Point& a0, const S2Point& a1,
-                               const S2Point& b0, const S2Point& b1,
-                               S1ChordAngle* min_dist);
+int UpdateEdgePairMinDistance(const S2Point& a0, const S2Point& a1,
+                              const S2Point& b0, const S2Point& b1,
+                              S1ChordAngle* min_dist);
 
 // As above, but for maximum distances.  If one edge crosses the antipodal
 // reflection of the other, the distance is Pi.
-bool UpdateEdgePairMaxDistance(const S2Point& a0, const S2Point& a1,
-                               const S2Point& b0, const S2Point& b1,
-                               S1ChordAngle* max_dist);
+int UpdateEdgePairMaxDistance(const S2Point& a0, const S2Point& a1,
+                              const S2Point& b0, const S2Point& b1,
+                              S1ChordAngle* max_dist);
 
 // Returns the pair of points (a, b) that achieves the minimum distance
 // between edges a0a1 and b0b1, where "a" is a point on a0a1 and "b" is a

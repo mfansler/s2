@@ -35,7 +35,7 @@ as_s2_geography <- function(x, ...) {
 #' @rdname as_s2_geography
 #' @export
 s2_geography <- function() {
-  new_s2_xptr(list(), "s2_geography")
+  new_s2_geography(list())
 }
 
 #' @rdname as_s2_geography
@@ -46,101 +46,165 @@ as_s2_geography.s2_geography <- function(x, ...) {
 
 #' @rdname as_s2_geography
 #' @export
-as_s2_geography.s2_lnglat <- function(x, ...) {
-  df <- data_frame_from_s2_lnglat(x)
-  new_s2_xptr(cpp_s2_geog_point(df[[1]], df[[2]]), "s2_geography")
-}
-
-#' @rdname as_s2_geography
-#' @export
-as_s2_geography.s2_point <- function(x, ...) {
-  as_s2_geography(as_s2_lnglat(x))
+as_s2_geography.wk_xy <- function(x, ...) {
+  x <- as_s2_lnglat(x)
+  df <- unclass(x)
+  s2_geog_point(df[[1]], df[[2]])
 }
 
 #' @rdname as_s2_geography
 #' @export
 as_s2_geography.wk_wkb <- function(x, ..., oriented = FALSE, check = TRUE) {
-  new_s2_xptr(
-    s2_geography_from_wkb(x, oriented = oriented, check = check),
-    "s2_geography"
+  if (identical(wk::wk_is_geodesic(x), FALSE)) {
+
+    # points and an empty vector are OK and shouldn't trigger an error
+    meta <- wk::wk_meta(x)
+    if (!all(meta$geometry_type %in% c(1, 4, NA), na.rm = TRUE)) {
+      stop(
+        paste0(
+          "Can't create s2_geography from Cartesian wkb().\n",
+          "Use `wk_set_geodesic(x, TRUE)` to assert that edges can be\n",
+          "interpolated along the sphere."
+        ),
+        call. = FALSE
+      )
+    }
+  }
+
+  wk::wk_handle(
+    x,
+    s2_geography_writer(oriented = oriented, check = check)
   )
 }
 
 #' @rdname as_s2_geography
 #' @export
 as_s2_geography.WKB <- function(x, ..., oriented = FALSE, check = TRUE) {
-  new_s2_xptr(
-    s2_geography_from_wkb(x, oriented = oriented, check = check),
-    "s2_geography"
-  )
+  s2_geog_from_wkb(x, oriented = oriented, check = check)
 }
 
 #' @rdname as_s2_geography
 #' @export
 as_s2_geography.blob <- function(x, ..., oriented = FALSE, check = TRUE) {
-  new_s2_xptr(
-    s2_geography_from_wkb(x, oriented = oriented, check = check),
-    "s2_geography"
-  )
+  s2_geog_from_wkb(x, oriented = oriented, check = check)
 }
 
 #' @rdname as_s2_geography
 #' @export
 as_s2_geography.wk_wkt <- function(x, ..., oriented = FALSE, check = TRUE) {
-  new_s2_xptr(
-    s2_geography_from_wkt(x, oriented = oriented, check = check),
-    "s2_geography"
+  if (identical(wk::wk_is_geodesic(x), FALSE)) {
+
+    # points and an empty vector are OK and shouldn't trigger an error
+    meta <- wk::wk_meta(x)
+    if (!all(meta$geometry_type %in% c(1, 4, NA), na.rm = TRUE)) {
+      stop(
+        paste0(
+          "Can't create s2_geography from Cartesian wkt().\n",
+          "Use `wk_set_geodesic(x, TRUE)` to assert that edges can be\n",
+          "interpolated along the sphere."
+        ),
+        call. = FALSE
+      )
+    }
+  }
+
+  wk::wk_handle(
+    x,
+    s2_geography_writer(oriented = oriented, check = check)
   )
 }
 
 #' @rdname as_s2_geography
 #' @export
 as_s2_geography.character <- function(x, ..., oriented = FALSE, check = TRUE) {
-  new_s2_xptr(
-    s2_geography_from_wkt(x, oriented = oriented, check = check),
-    "s2_geography"
-  )
+  s2_geog_from_text(x, oriented = oriented, check = check)
 }
 
 #' @rdname as_s2_geography
 #' @export
 as_s2_geography.logical <- function(x, ...) {
   stopifnot(isTRUE(x))
-  new_s2_xptr(s2_geography_full(TRUE), "s2_geography")
+  new_s2_geography(s2_geography_full(TRUE))
 }
 
 #' @importFrom wk as_wkb
 #' @rdname as_s2_geography
 #' @export
 as_wkb.s2_geography <- function(x, ...) {
-  wk::new_wk_wkb(s2_geography_to_wkb(x, wk::wk_platform_endian()))
+  wkb <- wk::wk_handle(x, wk::wkb_writer())
+  wk::wk_is_geodesic(wkb) <- TRUE
+  wk::wk_crs(wkb) <- wk::wk_crs_longlat()
+  wkb
 }
 
 #' @importFrom wk as_wkt
 #' @rdname as_s2_geography
 #' @export
 as_wkt.s2_geography <- function(x, ...) {
-  wk::new_wk_wkt(s2_geography_to_wkt(x, precision = 16, trim = TRUE))
+  wkt <- wk::wk_handle(x, wk::wkt_writer())
+  wk::wk_is_geodesic(wkt) <- TRUE
+  wk::wk_crs(wkt) <- wk::wk_crs_longlat()
+  wkt
 }
 
+#' @importFrom wk wk_crs
+#' @export
+wk_crs.s2_geography <- function(x) {
+  wk::wk_crs_longlat()
+}
+
+#' @importFrom wk wk_set_crs
+#' @export
+wk_set_crs.s2_geography <- function(x, crs) {
+  if (!wk::wk_crs_equal(crs, wk::wk_crs(x))) {
+    warning("Setting the crs of s2_geography() is not supported")
+  }
+
+  x
+}
+
+#' @importFrom wk wk_is_geodesic
+#' @export
+wk_is_geodesic.s2_geography <- function(x) {
+  TRUE
+}
+
+#' @importFrom wk wk_set_geodesic
+#' @export
+wk_set_geodesic.s2_geography <- function(x, geodesic) {
+  if (!isTRUE(geodesic)) {
+    stop("Can't set geodesic of s2_geography to FALSE")
+  }
+
+  x
+}
+
+new_s2_geography <- function(x) {
+  structure(x, class = c("s2_geography", "wk_vctr"))
+}
+
+#' @export
+is.na.s2_geography <- function(x) {
+  cpp_s2_geography_is_na(x)
+}
 
 #' @export
 `[<-.s2_geography` <- function(x, i, value) {
   x <- unclass(x)
   x[i] <- as_s2_geography(value)
-  new_s2_xptr(x, "s2_geography")
+  new_s2_geography(x)
 }
 
 #' @export
 `[[<-.s2_geography` <- function(x, i, value) {
   x <- unclass(x)
   x[i] <- as_s2_geography(value)
-  new_s2_xptr(x, "s2_geography")
+  new_s2_geography(x)
 }
 
 #' @export
 format.s2_geography <- function(x, ..., max_coords = 5, precision = 9, trim = TRUE) {
-  paste0("<", s2_geography_format(x, max_coords, precision, trim), ">")
+  wk::wk_format(x, precision = precision, max_coords = max_coords, trim = trim)
 }
 
 # this is what gets called by the RStudio viewer, for which
