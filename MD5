@@ -1,6 +1,6 @@
-0fd2625e1e8f8ff7821f3200198ebc3f *DESCRIPTION
+d2910c024580d3fc52d59ab1e85e59e5 *DESCRIPTION
 8f49b889e6270ac988fc307b40230b44 *NAMESPACE
-401a80d82f90d28be81cbfe0adb254e1 *NEWS.md
+2b4328c4e6d5ba021b5dc22ebb679ae1 *NEWS.md
 6e30cf9b0b3a9e4629b7b684856b4b07 *R/RcppExports.R
 26fbc9df4408ccb165ddbd0cd8577b7e *R/data.R
 4ca766e1349ea7baf27d4c8638fcb62b *R/plot.R
@@ -23,7 +23,7 @@ a2bcb714226ffff00165255cd261dcc5 *R/utils.R
 542c90500e67cf705cba921a201f5a57 *R/wk-utils.R
 fa791081760c033818970bdda18960bc *R/zzz.R
 0d29d0b0030a40d9fb9632cf82c261c5 *README.md
-0c6ad5b3446721162c89589e8077ab1c *build/partial.rdb
+ea124a494ad7922985532ad3b308e4d5 *build/partial.rdb
 cc6eebf14a3f516ec74168f3ea416fb2 *cleanup
 cbac38784589bac27de4468ecf03fb13 *configure
 d41d8cd98f00b204e9800998ecf8427e *configure.win
@@ -146,7 +146,7 @@ dde28d12969cb6df933b96f90b287506 *src/absl/container/internal/layout.h
 08ec3770b73818067921e384d882113b *src/absl/container/internal/node_hash_policy.h
 6bebca16955352c224454bad2947a1af *src/absl/container/internal/raw_hash_map.h
 330143d7b11b49fb5cc4790e16e23b25 *src/absl/container/internal/raw_hash_set.cc
-6cc10694c755f45efb3d940d24e5bf65 *src/absl/container/internal/raw_hash_set.h
+f26f8038276675396de102fd4a4a5226 *src/absl/container/internal/raw_hash_set.h
 b2c91b1fd5a05ea12fd76abd5e7401bc *src/absl/container/internal/tracked.h
 45e358ab0306337b76b37d58cefff3fc *src/absl/container/node_hash_map.h
 4587399b24c39753dc9c0597dc88c86c *src/absl/container/node_hash_set.h
@@ -241,7 +241,7 @@ e11e12d5a8451faafdfa9055ee790517 *src/absl/strings/internal/str_format/output.h
 42cf8fd14b9709ce8bd291d3e85c47cb *src/absl/strings/internal/str_format/parser.h
 0da27066225bcdc3b6f03bc778f189ad *src/absl/strings/internal/str_join_internal.h
 b1a532cd4b0d5ad6de67b268208a44d4 *src/absl/strings/internal/str_split_internal.h
-471b6b7154083c7597fedb2ebcb4f7f9 *src/absl/strings/internal/string_constant.h
+f80a3d44b2dcd996621484f0b6625707 *src/absl/strings/internal/string_constant.h
 3f62ae65e3b560df6dce5b898e18a77e *src/absl/strings/internal/utf8.cc
 da238e6d26546310d03ce815a181f9c3 *src/absl/strings/internal/utf8.h
 c26d8dc3c6998d1e4adb73b7b3e7307d *src/absl/strings/match.cc
@@ -591,7 +591,7 @@ fa56660fc40be26b3dbfc7115c56674e *src/s2/util/gtl/hashtable_common.h
 8e531532de42f1c1f7cd4adb553fe486 *src/s2/util/gtl/layout.h
 8c80e94bcdfb52740a0b8c0561845642 *src/s2/util/gtl/legacy_random_shuffle.h
 a36fbccb7e3c064e5a16b4ac1e7842f3 *src/s2/util/hash/mix.h
-ee8086e61b3c7a08e4b7a30d76b634f2 *src/s2/util/math/exactfloat/exactfloat.cc
+a77a8f0d9d512bbec62949a0b3db20aa *src/s2/util/math/exactfloat/exactfloat.cc
 828d0024dcc62675ab2be8b6f3cc3f93 *src/s2/util/math/exactfloat/exactfloat.h
 2037118f434c6f41bc8014de2eb18c92 *src/s2/util/math/mathutil.cc
 0c3be461d027e0cccb9c0facb12cd046 *src/s2/util/math/mathutil.h
