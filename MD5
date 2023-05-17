@@ -1,6 +1,6 @@
-167ade04e618f67d43ab2b8840111d8d *DESCRIPTION
+de87e4b860be3bfdddeff916c7c2b4e4 *DESCRIPTION
 976861cda1588338545dc222e269f6a0 *NAMESPACE
-592831f0010f1a07f9eb5eda282b6365 *NEWS.md
+5a92314e9624f924dbccc136c03e2c4b *NEWS.md
 6e30cf9b0b3a9e4629b7b684856b4b07 *R/RcppExports.R
 26fbc9df4408ccb165ddbd0cd8577b7e *R/data.R
 4ca766e1349ea7baf27d4c8638fcb62b *R/plot.R
@@ -23,7 +23,7 @@ a2bcb714226ffff00165255cd261dcc5 *R/utils.R
 542c90500e67cf705cba921a201f5a57 *R/wk-utils.R
 cab4cb3dc48318d6b30fea904fea6bd8 *R/zzz.R
 0d29d0b0030a40d9fb9632cf82c261c5 *README.md
-7f2094c7b4d5faa522b624cffc621f8b *build/partial.rdb
+439bf689fa27cf9affd0335332142165 *build/partial.rdb
 cc6eebf14a3f516ec74168f3ea416fb2 *cleanup
 cbac38784589bac27de4468ecf03fb13 *configure
 d41d8cd98f00b204e9800998ecf8427e *configure.win
@@ -553,7 +553,7 @@ eef1eb7446a79b5b6430af8eede7a698 *src/s2/s2r2rect.h
 57778c7c84ae75e67ed68e76f9026ec0 *src/s2/s2region.cc
 2234c6d0d865cc61ca6959c01e0015e4 *src/s2/s2region.h
 e12692516fc6b52c237e16cf16f11e19 *src/s2/s2region_coverer.cc
-fc15e353fdbb3c76de73bf5fa5a713d8 *src/s2/s2region_coverer.h
+dc72c2322d4aa4d89edaeac8a99d3110 *src/s2/s2region_coverer.h
 f622c31665d97c607e1cb5106c295959 *src/s2/s2region_intersection.cc
 d146a90111cd2d2b33b1526d5d1eab9e *src/s2/s2region_intersection.h
 4bedf29698cbce5a1d755b5d9f0e5312 *src/s2/s2region_term_indexer.cc
@@ -662,14 +662,14 @@ a9ffa55303a6dcba9c5c9c9d322e2009 *tests/area.R
 9a6a22f7e00fd5147781e07d2edd589e *tests/testthat.R
 755c4ca0ad5e6f558b9eb7c7e04ded6e *tests/testthat/test-data.R
 d8d89b5827614edf67567d7e15e2f213 *tests/testthat/test-plot.R
-ba1747c0aca10f3293809487570aa4f4 *tests/testthat/test-s2-accessors.R
+c94a63e70152c14d6ea3d8e0c947d739 *tests/testthat/test-s2-accessors.R
 6d272b0f1b19c173c19ff225c361cd31 *tests/testthat/test-s2-bounds.R
 5c3476c24589151b804b66580c20e9b8 *tests/testthat/test-s2-cell-union.R
 c64aab49b83a1fdc400a28233aefbda7 *tests/testthat/test-s2-cell.R
 2fb5fbb6a8d7d4d13c80c650380a2763 *tests/testthat/test-s2-constructors-formatters.R
 532d31b6373a11733f72fda2b4254ef6 *tests/testthat/test-s2-earth.R
 022f63897a9ae3916d1990c77c23c4ae *tests/testthat/test-s2-geography.R
-a8a78418fe1712163f460d298cde77f4 *tests/testthat/test-s2-lnglat.R
+68d9f8c6639d165549ed1e487365bb0e *tests/testthat/test-s2-lnglat.R
 b874f311928c98a3056d5628c55422c8 *tests/testthat/test-s2-matrix.R
 97bdafc52d85952cf4d72ef1818ba36c *tests/testthat/test-s2-options.R
 b8d52c633fa3d389a46c8198804f9757 *tests/testthat/test-s2-point.R
