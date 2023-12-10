@@ -1,13 +1,13 @@
-de87e4b860be3bfdddeff916c7c2b4e4 *DESCRIPTION
+e64dbcd1ce0308c66c1cf0b9f781b2fa *DESCRIPTION
 976861cda1588338545dc222e269f6a0 *NAMESPACE
-5a92314e9624f924dbccc136c03e2c4b *NEWS.md
+6ab6416908eb953cd94178099f948460 *NEWS.md
 6e30cf9b0b3a9e4629b7b684856b4b07 *R/RcppExports.R
 26fbc9df4408ccb165ddbd0cd8577b7e *R/data.R
 4ca766e1349ea7baf27d4c8638fcb62b *R/plot.R
 b783a368a460bcae5d174c575d863e59 *R/s2-accessors.R
 b218944d59f977684342e52d49ab881f *R/s2-bounds.R
 9b93004c163961946245e2ce97d2f27f *R/s2-cell-union.R
-36a32862a21527afdf59effa34ba30bb *R/s2-cell.R
+0230ea24aa3d0871817eb14e38db5e86 *R/s2-cell.R
 ed0cadf256cc791b85b392eef085c6f6 *R/s2-constructors-formatters.R
 0968515e318a2c7a7372bddad1be6c23 *R/s2-earth.R
 9cda6c070b015341cf92f57b9307a770 *R/s2-geography.R
@@ -22,8 +22,8 @@ a2bcb714226ffff00165255cd261dcc5 *R/utils.R
 1b0b65e06a8b04d12df322094d6a16c2 *R/vctrs.R
 542c90500e67cf705cba921a201f5a57 *R/wk-utils.R
 cab4cb3dc48318d6b30fea904fea6bd8 *R/zzz.R
-0d29d0b0030a40d9fb9632cf82c261c5 *README.md
-439bf689fa27cf9affd0335332142165 *build/partial.rdb
+1c1e19169a122703b3f214ced2d6e9a7 *README.md
+8faf250d78a120ba4c7ea2186efddd24 *build/partial.rdb
 cc6eebf14a3f516ec74168f3ea416fb2 *cleanup
 cbac38784589bac27de4468ecf03fb13 *configure
 d41d8cd98f00b204e9800998ecf8427e *configure.win
@@ -34,10 +34,10 @@ e59a2d1d70e5a35ca7a5d9bc17ff9554 *data/s2_data_tbl_cities.rda
 d41d8cd98f00b204e9800998ecf8427e *inst/extdata/emptyfile
 743a5630af573f46d1916e4810419a77 *man/as_s2_geography.Rd
 ed01c59b91c1a9c3382d1f2ab67e60cc *man/figures/rc300.png
-4a651a96987fab04091987a9343eda03 *man/s2-package.Rd
+3f1175562994dccc07c261d41a59f9a8 *man/s2-package.Rd
 52eef06fb0b570954600e8e619fe9756 *man/s2_boundary.Rd
 1ec1e77f9bf12466ef8c50a23beed9ca *man/s2_bounds_cap.Rd
-ebcba3b3e746c4e15de4b309d0674c37 *man/s2_cell.Rd
+b1d9411f69c129c5b1af27f91a1563b7 *man/s2_cell.Rd
 bb77b7b6b94be80cd6cdf8d8f074d03b *man/s2_cell_is_valid.Rd
 79be4874bfb6397f7e4ae40b18df426f *man/s2_cell_union.Rd
 71b26a6c7cc913b2dd369afcd744a8f1 *man/s2_cell_union_normalize.Rd
@@ -57,7 +57,7 @@ de7b3d7e917213319c2adcbda8c5bf98 *man/wk_handle.s2_geography.Rd
 563f58c84903d824a904660615e12c2a *src/Makevars.in
 08be2245599b0ea2815f132127574b84 *src/Makevars.ucrt
 7f0e39e59982689e148a8c55669548e5 *src/Makevars.win
-08d872fb5bb0af47a972af7330e486ef *src/RcppExports.cpp
+3db70a26666e975aaa150737208f8dd6 *src/RcppExports.cpp
 642c7be2ce45690aea290338fec0675b *src/absl/algorithm/algorithm.h
 fd93de75d5eb59a37dc897d538c9e428 *src/absl/algorithm/container.h
 8dda102d5b63125edd164fe345e55f9b *src/absl/base/attributes.h
@@ -69,7 +69,7 @@ f787189f34e273f4314344b53f5ccae9 *src/absl/base/const_init.h
 376abfbcc035fb5ddd76fb513589a1e9 *src/absl/base/internal/atomic_hook.h
 429261c728bd91fe9a974d2fcf8b8db6 *src/absl/base/internal/cycleclock.cc
 b921282429acd16526077295c5ac6b6e *src/absl/base/internal/cycleclock.h
-f5cec946747365781d14e7f395f3e908 *src/absl/base/internal/direct_mmap.h
+45d608f9994f8702730d7d6faef2b390 *src/absl/base/internal/direct_mmap.h
 3c6051b3b1895802b42fd070e0739173 *src/absl/base/internal/dynamic_annotations.h
 f2a2f6524ea5494e7a484254ec99ce78 *src/absl/base/internal/endian.h
 1ad6b95fe99ebc367d31ff7a9a8dd1fa *src/absl/base/internal/errno_saver.h
@@ -658,7 +658,7 @@ a8a420182aad78038f2f87e8b8e0539d *src/s2geography/predicates.h
 4495750656420f7cd041bf0bf27ec020 *src/tests/soname.h
 3ff04996080488941707e8fd75d50d02 *src/wk-impl.c
 a9ffa55303a6dcba9c5c9c9d322e2009 *tests/area.R
-960ec65d25d1018d2084d81ed3324fdd *tests/area.Rout
+ca2d545540a24ee1cdbf83a0060f6a43 *tests/area.Rout.save
 9a6a22f7e00fd5147781e07d2edd589e *tests/testthat.R
 755c4ca0ad5e6f558b9eb7c7e04ded6e *tests/testthat/test-data.R
 d8d89b5827614edf67567d7e15e2f213 *tests/testthat/test-plot.R
