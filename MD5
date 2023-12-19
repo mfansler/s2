@@ -1,4 +1,4 @@
-e64dbcd1ce0308c66c1cf0b9f781b2fa *DESCRIPTION
+307bfb0ede076557e0023dc2957a6442 *DESCRIPTION
 976861cda1588338545dc222e269f6a0 *NAMESPACE
 6ab6416908eb953cd94178099f948460 *NEWS.md
 6e30cf9b0b3a9e4629b7b684856b4b07 *R/RcppExports.R
@@ -57,7 +57,7 @@ de7b3d7e917213319c2adcbda8c5bf98 *man/wk_handle.s2_geography.Rd
 563f58c84903d824a904660615e12c2a *src/Makevars.in
 08be2245599b0ea2815f132127574b84 *src/Makevars.ucrt
 7f0e39e59982689e148a8c55669548e5 *src/Makevars.win
-3db70a26666e975aaa150737208f8dd6 *src/RcppExports.cpp
+d80ed8b93cfdc99fe99541b9e089b76f *src/RcppExports.cpp
 642c7be2ce45690aea290338fec0675b *src/absl/algorithm/algorithm.h
 fd93de75d5eb59a37dc897d538c9e428 *src/absl/algorithm/container.h
 8dda102d5b63125edd164fe345e55f9b *src/absl/base/attributes.h
