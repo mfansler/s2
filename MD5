@@ -1,4 +1,4 @@
-307bfb0ede076557e0023dc2957a6442 *DESCRIPTION
+9b559271baeabb154815b9e39b522a62 *DESCRIPTION
 976861cda1588338545dc222e269f6a0 *NAMESPACE
 6ab6416908eb953cd94178099f948460 *NEWS.md
 6e30cf9b0b3a9e4629b7b684856b4b07 *R/RcppExports.R
@@ -23,7 +23,7 @@ a2bcb714226ffff00165255cd261dcc5 *R/utils.R
 542c90500e67cf705cba921a201f5a57 *R/wk-utils.R
 cab4cb3dc48318d6b30fea904fea6bd8 *R/zzz.R
 1c1e19169a122703b3f214ced2d6e9a7 *README.md
-8faf250d78a120ba4c7ea2186efddd24 *build/partial.rdb
+f61db891eb928123aba4412ca322f508 *build/partial.rdb
 cc6eebf14a3f516ec74168f3ea416fb2 *cleanup
 cbac38784589bac27de4468ecf03fb13 *configure
 d41d8cd98f00b204e9800998ecf8427e *configure.win
@@ -54,8 +54,8 @@ c56c83fe4daade0fd891802084cc54fc *man/s2_geog_point.Rd
 f9c29bc19098f5fc595e260341adeacb *man/s2_plot.Rd
 6c76792603f4ce1efc64879d62b59517 *man/s2_point.Rd
 de7b3d7e917213319c2adcbda8c5bf98 *man/wk_handle.s2_geography.Rd
-563f58c84903d824a904660615e12c2a *src/Makevars.in
-08be2245599b0ea2815f132127574b84 *src/Makevars.ucrt
+b593c53774e6c0d3fd1542d70263af9f *src/Makevars.in
+d29bfcbd2d9c20aabd03fe1ecf012e26 *src/Makevars.ucrt
 7f0e39e59982689e148a8c55669548e5 *src/Makevars.win
 d80ed8b93cfdc99fe99541b9e089b76f *src/RcppExports.cpp
 642c7be2ce45690aea290338fec0675b *src/absl/algorithm/algorithm.h
