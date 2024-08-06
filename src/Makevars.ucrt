@@ -1,11 +1,5 @@
-PKG_CPPFLAGS = -DS2_USE_EXACTFLOAT -D_USE_MATH_DEFINES -DNDEBUG -DIS_LITTLE_ENDIAN -DOMIT_STRPTIME -I../src
-
-ifeq (,$(shell pkg-config --version 2>/dev/null))
-  PKG_LIBS = -Ls2 -ls2static -lssl -lcrypto -lz -lws2_32 -lgdi32 -lcrypt32
-else
-  PKG_LIBS = -Ls2 -ls2static $(shell pkg-config --libs openssl)
-endif
-
+PKG_CPPFLAGS = -I$(LIBRARY_INC) -DS2_USE_EXACTFLOAT -D_USE_MATH_DEFINES -DNDEBUG -DIS_LITTLE_ENDIAN -DOMIT_STRPTIME -I../src
+PKG_LIBS = -L$(LIBRARY_LIB) -Ls2 -ls2static -lssl -lcrypto -lz -lws2_32 -lgdi32 -lcrypt32 -lpthread
 
 CXX_STD = CXX14
 
