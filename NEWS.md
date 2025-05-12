@@ -1,3 +1,19 @@
+# s2 (development version)
+
+* `s2_buffer_cells()` recycles `max_dist` and `min_level` arguments, allowing
+   to specify these by feature (#264 and
+   https://github.com/r-spatial/sf/issues/2488).
+* The internal version of s2geometry is now 0.11.1 (#257, #263).
+* The Abseil dependency is resolved using pkg-config where possible.
+  Where this is not possible, a vendored version of Abseil will be built using
+  CMake (#258).
+
+# s2 1.1.7
+
+# s2 1.1.6
+
+* Fix CRAN warning (#254).
+
 # s2 1.1.5
 
 * fix compiler problem on Alpine 3.19.0 (#251)

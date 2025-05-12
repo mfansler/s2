@@ -19,17 +19,37 @@
 #define S2_ENCODED_S2POINT_VECTOR_H_
 
 #include <atomic>
+#include <cstddef>
+#include <vector>
+
 #include "absl/types/span.h"
+#include "s2/base/integral_types.h"
 #include "s2/encoded_string_vector.h"
 #include "s2/encoded_uint_vector.h"
+#include "s2/s2coder.h"
 #include "s2/s2point.h"
+#include "s2/s2shape.h"
+#include "s2/util/coding/coder.h"
 
 namespace s2coding {
 
-// Controls whether to optimize for speed or size when encoding points.  (Note
-// that encoding is always lossless, and that currently compact encodings are
-// only possible when points have been snapped to S2CellId centers.)
-enum class CodingHint : uint8 { FAST, COMPACT };
+// Modified for CRAN: anonymous struct in anonymous union is an extension
+// so we give them names here
+// https://github.com/r-spatial/s2/issues/271
+struct UncompressedS2Points {
+  const S2Point* points;
+};
+
+struct CompressedS2Points {
+  EncodedStringVector blocks;
+  uint64 base;
+  uint8 level;
+  bool have_exceptions;
+
+  // TODO(ericv): Use std::atomic_flag to cache the last point decoded in
+  // a thread-safe way.  This reduces benchmark times for actual polygon
+  // operations (e.g. S2ClosestEdgeQuery) by about 15%.
+};
 
 // Encodes a vector of S2Points in a format that can later be decoded as an
 // EncodedS2PointVector.
@@ -68,6 +88,10 @@ class EncodedS2PointVector {
   // Decodes and returns the entire original vector.
   std::vector<S2Point> Decode() const;
 
+  // Copy the encoded data to the encoder. This allows for "reserialization" of
+  // encoded shapes created through lazy decoding.
+  void Encode(Encoder* encoder) const;
+
   // TODO(ericv): Consider adding a method that returns an adjacent pair of
   // points.  This would save some decoding overhead.
 
@@ -90,26 +114,6 @@ class EncodedS2PointVector {
   // TODO(ericv): Once additional formats have been implemented, consider
   // using std::variant<> instead.  It's unclear whether this would have
   // better or worse performance than the current approach.
-
-  // dd: These structs are anonymous in the upstream S2 code; however,
-  // this generates CMD-check failure due to the [-Wnested-anon-types]
-  // (anonymous types declared in an anonymous union are an extension)
-  // The approach here just names the types.
-  struct CellIDStruct {
-    EncodedStringVector blocks;
-    uint64 base;
-    uint8 level;
-    bool have_exceptions;
-
-    // TODO(ericv): Use std::atomic_flag to cache the last point decoded in
-    // a thread-safe way.  This reduces benchmark times for actual polygon
-    // operations (e.g. S2ClosestEdgeQuery) by about 15%.
-  };
-
-  struct UncompressedStruct {
-    const S2Point* points;
-  };
-
   enum Format : uint8 {
     UNCOMPRESSED = 0,
     CELL_IDS = 1,
@@ -117,18 +121,14 @@ class EncodedS2PointVector {
   Format format_;
   uint32 size_;
   union {
-    struct UncompressedStruct uncompressed_;
-    struct CellIDStruct cell_ids_;
+    UncompressedS2Points uncompressed_;
+    CompressedS2Points cell_ids_;
   };
 };
 
-
 //////////////////   Implementation details follow   ////////////////////
 
-
-inline size_t EncodedS2PointVector::size() const {
-  return size_;
-}
+inline size_t EncodedS2PointVector::size() const { return size_; }
 
 inline S2Point EncodedS2PointVector::operator[](int i) const {
   switch (format_) {
@@ -139,7 +139,7 @@ inline S2Point EncodedS2PointVector::operator[](int i) const {
       return DecodeCellIdsFormat(i);
 
     default:
-      S2_LOG(DFATAL) << "Unrecognized format";
+      S2_DLOG(FATAL) << "Unrecognized format";
       return S2Point();
   }
 }
