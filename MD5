@@ -1,6 +1,6 @@
-1e0b86992f7f90c6f429bb6d8a52dcdd *DESCRIPTION
+90e2d6a8c71cf6497e42e9669bb55d13 *DESCRIPTION
 976861cda1588338545dc222e269f6a0 *NAMESPACE
-24b4847f45f60e19a382a1d9f9e09b1c *NEWS.md
+9759816948410031355250126566c70e *NEWS.md
 6e30cf9b0b3a9e4629b7b684856b4b07 *R/RcppExports.R
 26fbc9df4408ccb165ddbd0cd8577b7e *R/data.R
 4ca766e1349ea7baf27d4c8638fcb62b *R/plot.R
@@ -26,7 +26,7 @@ fa55c206e97e4568525a1c181a45a14f *README.md
 b52aabe9a2757fc86742763db9dafc9b *build/partial.rdb
 e807b15796c897df22af199b37115a86 *cleanup
 f9371fd323ed155891ad627f82b49869 *cleanup.win
-ecdaa27e4bb19f4ebe2e6b428c6bc305 *configure
+b5349769e4fceb1535ee462c8ffa269c *configure
 f6af5ffad723ee0fd9d9fa1c0e188cdd *configure.win
 885346a0f57b92fd80b41b8afac11bad *data/s2_data_example_wkt.rda
 e59a2d1d70e5a35ca7a5d9bc17ff9554 *data/s2_data_tbl_cities.rda
@@ -258,7 +258,7 @@ ddd9c1dbf9acad36a5e78baf3ee027b6 *src/s2/s2r2rect.cc
 62af1cb05144bf2971f8752141305fcf *src/s2/s2region.cc
 09fc3b021a88da286c104018614c1346 *src/s2/s2region.h
 8e0f4d1cbc87a5f75c8ebce2bf1f7e73 *src/s2/s2region_coverer.cc
-900e0efb8949c8bd05f488bf5c47de85 *src/s2/s2region_coverer.h
+dee2a85d36af37c2d26072c6fffc0580 *src/s2/s2region_coverer.h
 9f507d269213ac1a4810ea50cfe49747 *src/s2/s2region_intersection.cc
 678e8593132c4ead88946dce8850cbd4 *src/s2/s2region_intersection.h
 d35378838a2057f0e2f1691e407285a9 *src/s2/s2region_term_indexer.cc
@@ -318,7 +318,7 @@ c4fe67fd8a294e03bfc46ce9fb1134d1 *src/s2/util/coding/nth-derivative.h
 909b6ae732d98f2b9d987d77b203a167 *src/s2/util/coding/varint.cc
 ab840393a6eb9ba2177ec8d87c06f9f8 *src/s2/util/coding/varint.h
 655a522cab04be1f9998f30cbcb3fa6f *src/s2/util/endian/endian.h
-3ac258ea35cdee02188818dfa88a382d *src/s2/util/gtl/compact_array.h
+3b0e5355381cd38525b91768c5e022e0 *src/s2/util/gtl/compact_array.h
 9da223fdb5695125724b0f25e2aced84 *src/s2/util/gtl/container_logging.h
 b673afedda1e54e4f2fcef3fb75c9155 *src/s2/util/gtl/dense_hash_set.h
 69836a550c727b302c5a3b478210ebd6 *src/s2/util/gtl/densehashtable.h
@@ -376,7 +376,7 @@ b874f311928c98a3056d5628c55422c8 *tests/testthat/test-s2-matrix.R
 97bdafc52d85952cf4d72ef1818ba36c *tests/testthat/test-s2-options.R
 b8d52c633fa3d389a46c8198804f9757 *tests/testthat/test-s2-point.R
 6a0b51e1b62caf1dc1ce91d662c9a424 *tests/testthat/test-s2-predicates.R
-a6c17198b26f4c137c58c6fd3e05f46b *tests/testthat/test-s2-transformers.R
+93dd5609cdf7742064860109d1707e19 *tests/testthat/test-s2-transformers.R
 a7de1183f03382626ca2b46bf1c4e781 *tests/testthat/test-utils.R
 b5d1a424ccbbe1365b0c4cde62d5589d *tests/testthat/test-vctrs.R
 eb4ce45137cf0d61472a37c5f493d59b *tests/testthat/test-wk-utils.R
@@ -539,7 +539,7 @@ b2c91b1fd5a05ea12fd76abd5e7401bc *tools/vendor/abseil-cpp/absl/container/interna
 4790826519d702e4e326e029697d2acc *tools/vendor/abseil-cpp/absl/container/node_hash_map.h
 21ed61f886ba2ec24a9393a5317035f5 *tools/vendor/abseil-cpp/absl/container/node_hash_set.h
 fc9552e28ae75489c33a1eaed84323a7 *tools/vendor/abseil-cpp/absl/copts/AbseilConfigureCopts.cmake
-155f64b1fd998b818e056ca802b5bd49 *tools/vendor/abseil-cpp/absl/copts/GENERATED_AbseilCopts.cmake
+9d95d4c83411e76dcd8e7f860ef24f09 *tools/vendor/abseil-cpp/absl/copts/GENERATED_AbseilCopts.cmake
 88cb1124e274f000873bfeac6a268154 *tools/vendor/abseil-cpp/absl/copts/GENERATED_copts.bzl
 d00cf9583865fabcb6fbc6c8e1779582 *tools/vendor/abseil-cpp/absl/copts/configure_copts.bzl
 d62097a1e1aea4541120a8e95f5f86c9 *tools/vendor/abseil-cpp/absl/copts/copts.py
