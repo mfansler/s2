@@ -23,7 +23,7 @@ else
   OPENSSL_LIB_FLAGS = $(shell pkg-config --libs openssl)
 endif
 
-PKG_CPPFLAGS = $(ABSL_CFLAGS) $(OPENSSL_CFLAGS) -DSTRICT_R_HEADERS -DS2_USE_EXACTFLOAT -D_USE_MATH_DEFINES -DNDEBUG -DOMIT_STRPTIME -I../src
+PKG_CPPFLAGS = $(ABSL_CFLAGS) $(OPENSSL_CFLAGS) -DSTRICT_R_HEADERS -DRCPP_NO_MASK_RF_ERROR -DS2_USE_EXACTFLOAT -D_USE_MATH_DEFINES -DNDEBUG -DOMIT_STRPTIME -I../src
 PKG_LIBS = $(ABSL_LIB_FLAGS) $(OPENSSL_LIB_FLAGS)
 
 CXX_STD = CXX17
@@ -127,6 +127,7 @@ OBJECTS = s2/encoded_s2cell_id_vector.o \
      s2/util/math/mathutil.o \
      s2/util/units/length-units.o \
      cpp-compat.o \
+     s2-altrep.o \
      s2-accessors.o \
      s2-bounds.o \
      s2-cell.o \
@@ -135,6 +136,7 @@ OBJECTS = s2/encoded_s2cell_id_vector.o \
      s2-predicates.o \
      s2-transformers.o \
      init.o \
+     util.o \
      RcppExports.o \
      s2-geography.o \
      s2-lnglat.o \

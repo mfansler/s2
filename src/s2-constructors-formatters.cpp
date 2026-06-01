@@ -1,6 +1,6 @@
 
 #define R_NO_REMAP
-#include <R.h>
+#include <Rcpp.h>
 #include <Rinternals.h>
 
 #include "s2/s2pointutil.h"
@@ -50,6 +50,7 @@ typedef struct {
     SEXP result;
     R_xlen_t feat_id;
     int coord_size;
+    int use_altrep;
     char cpp_exception_error[8096];
 } builder_handler_t;
 
@@ -109,12 +110,22 @@ int builder_vector_start(const wk_vector_meta_t* meta, void* handler_data) {
 SEXP builder_vector_end(const wk_vector_meta_t* meta, void* handler_data) {
   builder_handler_t* data = (builder_handler_t*) handler_data;
   builder_result_finalize(data);
+
+  // make the result into a s2_geography object
+  SEXP result;
+  if (data->use_altrep) {
+    result = PROTECT(make_s2_geography_altrep(data->result));
+  } else {
+    result = PROTECT(data->result);
+  }
+
   SEXP cls = PROTECT(Rf_allocVector(STRSXP, 2));
   SET_STRING_ELT(cls, 0, Rf_mkChar("s2_geography"));
   SET_STRING_ELT(cls, 1, Rf_mkChar("wk_vctr"));
-  Rf_setAttrib(data->result, R_ClassSymbol, cls);
-  UNPROTECT(1);
-  return data->result;
+  Rf_setAttrib(result, R_ClassSymbol, cls);
+  UNPROTECT(2);
+
+  return result;
 }
 
 int builder_feature_start(const wk_vector_meta_t* meta, R_xlen_t feat_id, void* handler_data) {
@@ -237,14 +248,19 @@ void delete_vector_constructor(SEXP xptr) {
 
 extern "C" SEXP c_s2_geography_writer_new(SEXP oriented_sexp, SEXP check_sexp,
                                           SEXP projection_xptr,
-                                          SEXP tessellate_tolerance_sexp) {
+                                          SEXP tessellate_tolerance_sexp,
+                                          SEXP use_altrep_sexp) {
   CPP_START
 
   int oriented = LOGICAL(oriented_sexp)[0];
   int check = LOGICAL(check_sexp)[0];
+  int use_altrep = LOGICAL(use_altrep_sexp)[0];
   S2::Projection* projection = NULL;
   if (projection_xptr != R_NilValue) {
     projection = reinterpret_cast<S2::Projection*>(R_ExternalPtrAddr(projection_xptr));
+    if (projection == nullptr) {
+      Rf_error("External ptr to S2::Projection is not valid");
+    }
   }
   double tessellate_tolerance = REAL(tessellate_tolerance_sexp)[0];
 
@@ -289,6 +305,7 @@ extern "C" SEXP c_s2_geography_writer_new(SEXP oriented_sexp, SEXP check_sexp,
   }
 
   data->coord_size = 2;
+  data->use_altrep = use_altrep;
   data->builder = builder;
   data->result = R_NilValue;
   memset(data->cpp_exception_error, 0, 8096);
@@ -780,6 +797,10 @@ SEXP handle_geography_templ(SEXP data, EdgeExporterT* exporter, wk_handler_t* ha
           HANDLE_CONTINUE_OR_BREAK(handler->null_feature(handler->handler_data));
         } else {
           auto item_ptr = reinterpret_cast<RGeography*>(R_ExternalPtrAddr(item));
+          if (item_ptr == nullptr) {
+            Rf_error("External pointer is not valid [i = %d]", (int)i + 1);
+          }
+
           const s2geography::Geography* geog_ptr = &item_ptr->Geog();
 
           auto child_point = dynamic_cast<const s2geography::PointGeography*>(geog_ptr);
@@ -832,6 +853,10 @@ SEXP handle_geography(SEXP data, wk_handler_t* handler) {
 
   if (projection_xptr != R_NilValue) {
     auto projection = reinterpret_cast<S2::Projection*>(R_ExternalPtrAddr(projection_xptr));
+    if (projection == nullptr) {
+      Rf_error("External ptr to S2::Projection is not valid");
+    }
+
     s2geography::util::Constructor::Options options;
     options.set_projection(projection);
 
@@ -860,6 +885,10 @@ extern "C" SEXP c_s2_handle_geography(SEXP data, SEXP handler_xptr) {
 SEXP handle_geography_tessellated(SEXP data, wk_handler_t* handler) {
   SEXP projection_xptr = Rf_getAttrib(data, Rf_install("s2_projection"));
   auto projection = reinterpret_cast<S2::Projection*>(R_ExternalPtrAddr(projection_xptr));
+  if (projection == nullptr) {
+    Rf_error("External ptr to S2::Projection is not valid");
+  }
+
   SEXP tessellate_tolerance_sexp = Rf_getAttrib(data, Rf_install("s2_tessellate_tol"));
   double tessellate_tol = REAL(tessellate_tolerance_sexp)[0];
 

@@ -1,5 +1,13 @@
-# s2 (development version)
+# s2 1.1.11
 
+* Fix deprecated Abseil usage and Rcpp include order #300 #297 #299
+
+# s2 1.1.9
+
+* Implement serialization support for `s2_geography` vectors. This not only 
+  allows data containing s2 geography to be safely saved and restored across 
+  R sessions, but also enables using `s2` in parallel algorithms such as 
+  `mclapply()` (#283)
 * Fix code to help gcc-ubsan understand the region coverer (#275)
 * Inspect `S2_FORCE_BUNDLED_ABSEIL` in `conifigure`: if non-empty, any system
   install of Abseil is ignored (e.g., if using a non-standard compiler on a
